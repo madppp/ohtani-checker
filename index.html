@@ -1399,19 +1399,19 @@
 
         let datetime = null;
         if (result.DateTimeOriginal) {
-          const pad = n => String(n).padStart(2, '0');
+          let d;
           if (result.DateTimeOriginal instanceof Date) {
-            // exifr は EXIF のローカル時刻をそのまま UTC として Date に格納する
-            // → getUTC*() で取り出すと元のローカル時刻の数値が得られる
-            const t = result.DateTimeOriginal;
-            datetime = `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
+            // exifr は new Date(y, m, d, h, min, s) でローカル時刻として生成する
+            // → そのまま toISOString() でUTCに変換して保存し、
+            //   表示時に getHours()（ローカル）で戻すと正しい時刻になる
+            d = result.DateTimeOriginal;
           } else {
-            // 文字列 "2025:03:29 17:11:00" → ローカル時刻として解釈
+            // 文字列 "2026:03:29 17:11:00" → ローカル時刻として解釈
             const str = result.DateTimeOriginal.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
-            const d = new Date(str);
-            if (!isNaN(d.getTime())) {
-              datetime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-            }
+            d = new Date(str);
+          }
+          if (!isNaN(d.getTime())) {
+            datetime = d.toISOString();
           }
         }
 
