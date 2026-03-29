@@ -1,415 +1,444 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>大谷チェッカー</title>
 
-  <!-- Google Fonts: Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
-
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- exifr (EXIF解析ライブラリ) -->
   <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 
   <style>
-    /* =============================================
-       CSS 変数
-       ============================================= */
     :root {
-      --color-accent:      #E63312;
+      --color-accent: #E63312;
       --color-accent-dark: #C42A0E;
-      --color-bg:          #F5F5F5;
-      --color-card:        #FFFFFF;
-      --color-text:        #1A1A1A;
-      --color-text-sub:    #888888;
-      --color-border:      #E8E8E8;
-      --color-shadow:      rgba(0,0,0,0.08);
-      --color-overlay:     rgba(0,0,0,0.5);
-      --color-success:     #22C55E;
-      --color-error:       #EF4444;
+      --color-bg: #F5F5F5;
+      --color-card: #FFFFFF;
+      --color-text: #1A1A1A;
+      --color-text-sub: #888888;
+      --color-border: #E8E8E8;
+      --color-shadow: rgba(0, 0, 0, 0.08);
+      --color-overlay: rgba(0, 0, 0, 0.5);
+      --color-success: #22C55E;
+      --color-error: #EF4444;
 
-      --radius-card:   12px;
-      --radius-modal:  20px 20px 0 0;
-      --radius-btn:    10px;
-      --radius-input:  10px;
-      --radius-badge:  6px;
-      --radius-full:   9999px;
+      --radius-card: 12px;
+      --radius-modal: 20px 20px 0 0;
+      --radius-btn: 10px;
+      --radius-input: 10px;
+      --radius-badge: 6px;
+      --radius-full: 9999px;
 
-      --space-xs:  4px;
-      --space-sm:  8px;
-      --space-md:  16px;
-      --space-lg:  24px;
-      --space-xl:  32px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
 
       --font-main: 'Noto Sans JP', sans-serif;
-      --font-mono: 'SF Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
+      --font-mono: 'SF Mono', 'Fira Code', monospace;
 
-      --transition-fast:   0.15s ease;
-      --transition-normal: 0.25s ease;
-      --transition-slow:   0.35s ease;
-
-      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-left:   env(safe-area-inset-left, 0px);
-      --safe-right:  env(safe-area-inset-right, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
 
       --header-height: 56px;
     }
 
-    /* =============================================
-       リセット
-       ============================================= */
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
+    html,
     body {
+      height: 100%;
       font-family: var(--font-main);
-      background-color: var(--color-bg);
+      background: var(--color-bg);
       color: var(--color-text);
-      min-height: 100dvh;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overscroll-behavior: none;
     }
 
-    button {
-      cursor: pointer;
-      font-family: inherit;
-      border: none;
-      background: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    input, textarea {
-      font-family: inherit;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    /* スクロールバー非表示 */
-    * {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    *::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* =============================================
-       .hidden ユーティリティ
-       ============================================= */
-    .hidden {
-      display: none !important;
-    }
-
-    /* =============================================
-       #app — メインコンテナ
-       ============================================= */
+    /* ─── Layout ─── */
     #app {
       max-width: 480px;
       margin: 0 auto;
-      min-height: 100dvh;
+      min-height: 100%;
       position: relative;
-      background-color: var(--color-bg);
+      background: var(--color-bg);
     }
 
-    /* =============================================
-       ヘッダー
-       ============================================= */
-    #header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background-color: var(--color-accent);
-      padding-top: var(--safe-top);
-      box-shadow: 0 2px 8px rgba(230,51,18,0.3);
-    }
-
-    #header-main {
+    /* ─── Login Screen ─── */
+    #login-screen {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: var(--header-height);
-      padding: 0 var(--space-md);
-    }
-
-    #app-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #FFFFFF;
-      letter-spacing: 0.02em;
-    }
-
-    #search-btn {
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      min-height: 100vh;
+      padding: var(--space-xl) var(--space-lg);
+      background: var(--color-card);
+      text-align: center;
+    }
+
+    #login-screen.hidden {
+      display: none;
+    }
+
+    .login-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-lg);
+      line-height: 1;
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin-bottom: var(--space-sm);
+      letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+      font-size: 15px;
+      color: var(--color-text-sub);
+      line-height: 1.6;
+      margin-bottom: var(--space-xl);
+    }
+
+    #google-signin-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 14px var(--space-xl);
+      background: var(--color-card);
+      border: 2px solid var(--color-border);
       border-radius: var(--radius-full);
-      color: rgba(255,255,255,0.9);
-      transition: background-color var(--transition-fast);
+      font-family: var(--font-main);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px var(--color-shadow);
     }
 
-    #search-btn:hover,
-    #search-btn:active {
-      background-color: rgba(255,255,255,0.15);
+    #google-signin-btn:hover {
+      border-color: var(--color-accent);
+      box-shadow: 0 4px 16px rgba(230, 51, 18, 0.15);
+      transform: translateY(-1px);
     }
 
-    #search-btn svg {
+    #google-signin-btn:active {
+      transform: translateY(0);
+    }
+
+    .google-logo {
       width: 20px;
       height: 20px;
     }
 
-    /* 検索バー */
-    #search-bar {
-      background-color: var(--color-accent-dark);
-      padding: var(--space-sm) var(--space-md);
-      padding-bottom: calc(var(--space-sm) + 2px);
+    .login-note {
+      margin-top: var(--space-lg);
+      font-size: 12px;
+      color: var(--color-text-sub);
+    }
+
+    /* ─── Main App ─── */
+    #main-app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    #main-app.hidden {
+      display: none;
+    }
+
+    /* ─── Header ─── */
+    #header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-accent);
+      padding: calc(var(--safe-top) + 12px) var(--space-md) 12px;
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      animation: slideDown var(--transition-normal) forwards;
+      box-shadow: 0 2px 8px rgba(230, 51, 18, 0.3);
     }
 
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    #search-input {
+    .header-title {
       flex: 1;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .header-btn {
+      width: 36px;
       height: 36px;
-      border-radius: var(--radius-full);
-      border: none;
-      outline: none;
-      background-color: rgba(255,255,255,0.15);
-      color: #FFFFFF;
-      padding: 0 var(--space-md);
-      font-size: 14px;
-      transition: background-color var(--transition-fast);
-    }
-
-    #search-input::placeholder {
-      color: rgba(255,255,255,0.6);
-    }
-
-    #search-input:focus {
-      background-color: rgba(255,255,255,0.22);
-    }
-
-    #search-clear-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
       border-radius: var(--radius-full);
-      color: rgba(255,255,255,0.8);
-      flex-shrink: 0;
-      transition: background-color var(--transition-fast);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
     }
 
-    #search-clear-btn:hover {
-      background-color: rgba(255,255,255,0.15);
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
     }
 
-    #search-clear-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* =============================================
-       メインコンテンツ
-       ============================================= */
-    #main-content {
-      padding: var(--space-md) var(--space-md) calc(88px + var(--safe-bottom));
-      min-height: calc(100dvh - var(--header-height) - var(--safe-top));
-    }
-
-    /* =============================================
-       スケルトンスクリーン
-       ============================================= */
-    #skeleton-screen {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-    }
-
-    .skeleton-card {
-      background-color: var(--color-card);
+    /* ─── Account Menu ─── */
+    #account-menu {
+      position: fixed;
+      top: calc(var(--safe-top) + 56px);
+      right: max(var(--space-md), calc((100vw - 480px) / 2 + var(--space-md)));
+      background: var(--color-card);
       border-radius: var(--radius-card);
-      height: 96px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
       overflow: hidden;
-      position: relative;
+      z-index: 200;
+      min-width: 200px;
     }
 
-    .skeleton-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255,255,255,0.6) 50%,
-        transparent 100%
-      );
-      animation: shimmer 1.4s infinite;
+    #account-menu.hidden {
+      display: none;
+    }
+
+    .account-info {
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .account-email {
+      font-size: 12px;
+      color: var(--color-text-sub);
+      word-break: break-all;
+    }
+
+    .account-menu-item {
+      width: 100%;
+      padding: 14px var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      border: none;
+      background: none;
+      font-family: var(--font-main);
+      font-size: 14px;
+      color: var(--color-error);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .account-menu-item:hover {
+      background: #FFF5F5;
+    }
+
+    /* ─── Search Bar ─── */
+    #search-bar {
+      background: var(--color-card);
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    #search-bar.hidden {
+      display: none;
+    }
+
+    #search-input {
+      width: 100%;
+      padding: 10px var(--space-md);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-full);
+      font-family: var(--font-main);
+      font-size: 14px;
+      outline: none;
+      background: var(--color-bg);
+      transition: border-color 0.2s;
+    }
+
+    #search-input:focus {
+      border-color: var(--color-accent);
+    }
+
+    /* ─── Skeleton ─── */
+    #skeleton-screen {
+      padding: var(--space-md);
+    }
+
+    #skeleton-screen.hidden {
+      display: none;
     }
 
     @keyframes shimmer {
-      from { transform: translateX(-100%); }
-      to   { transform: translateX(100%); }
+      0% {
+        background-position: -480px 0;
+      }
+
+      100% {
+        background-position: 480px 0;
+      }
     }
 
-    /* =============================================
-       空状態
-       ============================================= */
+    .skeleton-card {
+      background: var(--color-card);
+      border-radius: var(--radius-card);
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    .skeleton-line {
+      height: 14px;
+      border-radius: 7px;
+      background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%);
+      background-size: 480px 100%;
+      animation: shimmer 1.4s infinite linear;
+      margin-bottom: var(--space-sm);
+    }
+
+    .skeleton-line.short {
+      width: 40%;
+    }
+
+    .skeleton-line.medium {
+      width: 65%;
+    }
+
+    .skeleton-line.tall {
+      height: 20px;
+      width: 55%;
+    }
+
+    /* ─── Empty State ─── */
     #empty-state {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: var(--space-xl) var(--space-lg);
-      gap: var(--space-md);
-      min-height: 320px;
       text-align: center;
+      min-height: 60vh;
     }
 
-    #empty-state-icon {
+    #empty-state.hidden {
+      display: none;
+    }
+
+    .empty-icon {
       width: 72px;
       height: 72px;
+      background: #FFF0EE;
       border-radius: var(--radius-full);
-      background-color: rgba(230,51,18,0.08);
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: var(--space-lg);
       color: var(--color-accent);
-      margin-bottom: var(--space-sm);
     }
 
-    #empty-state-icon svg {
-      width: 36px;
-      height: 36px;
-    }
-
-    #empty-state-title {
+    .empty-title {
       font-size: 17px;
       font-weight: 700;
       color: var(--color-text);
+      margin-bottom: var(--space-sm);
     }
 
-    #empty-state-subtitle {
+    .empty-sub {
       font-size: 14px;
       color: var(--color-text-sub);
       line-height: 1.6;
     }
 
-    /* =============================================
-       月セクション
-       ============================================= */
+    /* ─── List ─── */
+    #sightings-list {
+      padding: 0 var(--space-md) calc(80px + var(--safe-bottom));
+    }
+
     .month-section {
-      margin-bottom: var(--space-md);
+      margin-bottom: var(--space-xs);
     }
 
     .month-header {
       position: sticky;
-      top: calc(var(--header-height) + var(--safe-top));
+      top: var(--header-height);
       z-index: 50;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--color-text-sub);
-      letter-spacing: 0.06em;
-      padding: var(--space-sm) 0 var(--space-xs);
-      background-color: var(--color-bg);
+      padding: 10px 0 6px;
+      background: var(--color-bg);
       display: flex;
       align-items: center;
       gap: var(--space-sm);
     }
 
-    .month-header::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background-color: var(--color-border);
+    .month-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text-sub);
+      letter-spacing: 0.5px;
     }
 
     .month-count {
       font-size: 11px;
-      font-weight: 500;
-      color: var(--color-text-sub);
-      background-color: var(--color-border);
+      font-weight: 700;
+      background: var(--color-accent);
+      color: #fff;
       padding: 2px 7px;
       border-radius: var(--radius-full);
-      margin-left: auto;
-    }
-
-    /* =============================================
-       目撃カード
-       ============================================= */
-    .sighting-card {
-      background-color: var(--color-card);
-      border-radius: var(--radius-card);
-      padding: var(--space-md);
-      margin-bottom: var(--space-sm);
-      box-shadow: 0 1px 4px var(--color-shadow);
-      cursor: pointer;
-      transition:
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast);
-      animation: fadeInCard var(--transition-slow) both;
-      -webkit-tap-highlight-color: transparent;
     }
 
     @keyframes fadeInCard {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sighting-card {
+      background: var(--color-card);
+      border-radius: var(--radius-card);
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+      cursor: pointer;
+      box-shadow: 0 1px 4px var(--color-shadow);
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: fadeInCard 0.3s ease forwards;
     }
 
     .sighting-card:hover {
+      transform: translateY(-1px);
       box-shadow: 0 4px 12px var(--color-shadow);
     }
 
     .sighting-card:active {
       transform: scale(0.98);
-      box-shadow: 0 1px 4px var(--color-shadow);
     }
 
-    .card-date-row {
-      display: flex;
-      align-items: baseline;
-      gap: var(--space-xs);
-      margin-bottom: 4px;
-    }
-
-    .card-date {
-      font-family: var(--font-mono);
+    .card-datetime {
       font-size: 20px;
       font-weight: 700;
-      color: var(--color-text);
-      line-height: 1.1;
-    }
-
-    .card-time {
       font-family: var(--font-mono);
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-text-sub);
+      color: var(--color-text);
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
     }
 
     .card-location {
@@ -421,1379 +450,1034 @@
       gap: 4px;
     }
 
-    .card-location svg {
-      width: 11px;
-      height: 11px;
-      flex-shrink: 0;
-      color: var(--color-accent);
-    }
-
     .card-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--color-text);
-      margin-bottom: var(--space-sm);
+      margin-bottom: 8px;
       line-height: 1.4;
     }
 
-    .card-title:empty {
-      display: none;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      gap: var(--space-xs);
-    }
-
-    /* バッジ */
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
+      display: inline-block;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 700;
       padding: 2px 8px;
       border-radius: var(--radius-badge);
-      letter-spacing: 0.03em;
+      letter-spacing: 0.5px;
     }
 
     .badge--text {
-      background-color: rgba(230,51,18,0.10);
+      background: #FFF0EE;
       color: var(--color-accent);
     }
 
     .badge--photo {
-      background-color: rgba(59,130,246,0.10);
+      background: #EFF6FF;
       color: #3B82F6;
     }
 
-    .card-relative-time {
-      font-size: 11px;
-      color: var(--color-text-sub);
-      margin-left: auto;
-    }
-
-    /* =============================================
-       FAB（フローティングアクションボタン）
-       ============================================= */
+    /* ─── FAB ─── */
     #fab {
       position: fixed;
       bottom: calc(var(--space-lg) + var(--safe-bottom));
-      right: calc(var(--space-lg) + var(--safe-right));
+      right: max(var(--space-lg), calc((100vw - 480px) / 2 + var(--space-lg)));
       width: 56px;
       height: 56px;
       border-radius: var(--radius-full);
-      background-color: var(--color-accent);
-      color: #FFFFFF;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(230, 51, 18, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 16px rgba(230,51,18,0.4);
-      transition:
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast),
-        background-color var(--transition-fast);
-      z-index: 200;
-      /* FABが画面中央の480px枠内に収まるよう調整 */
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 90;
     }
 
-    @media (min-width: 480px) {
-      #fab {
-        right: calc(50% - 240px + var(--space-lg));
-      }
+    #fab.hidden {
+      display: none;
     }
 
     #fab:hover {
-      background-color: var(--color-accent-dark);
-      box-shadow: 0 6px 20px rgba(230,51,18,0.5);
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(230, 51, 18, 0.5);
     }
 
     #fab:active {
-      transform: scale(0.92);
-      box-shadow: 0 2px 8px rgba(230,51,18,0.3);
+      transform: scale(0.95);
     }
 
-    #fab svg {
-      width: 26px;
-      height: 26px;
-    }
-
-    /* =============================================
-       モーダル共通
-       ============================================= */
-    .modal {
+    /* ─── Modal Base ─── */
+    .modal-overlay {
       position: fixed;
       inset: 0;
-      z-index: 500;
+      background: var(--color-overlay);
+      z-index: 300;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      /* .hidden で display:none になるため、表示時はflexに戻す */
+      align-items: flex-end;
+      justify-content: center;
     }
 
-    .modal-overlay {
-      position: absolute;
-      inset: 0;
-      background-color: var(--color-overlay);
-      animation: fadeInOverlay var(--transition-normal) forwards;
-    }
-
-    @keyframes fadeInOverlay {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+    .modal-overlay.hidden {
+      display: none;
     }
 
     .modal-sheet {
-      position: relative;
-      z-index: 1;
-      background-color: var(--color-card);
-      border-radius: var(--radius-modal);
-      max-height: 90dvh;
-      overflow-y: auto;
-      padding-bottom: calc(var(--space-lg) + var(--safe-bottom));
-      animation: slideUpModal var(--transition-slow) cubic-bezier(0.32,0.72,0,1) forwards;
-      /* 中央揃え（480px以上のデスクトップ） */
-      max-width: 480px;
       width: 100%;
-      margin: 0 auto;
+      max-width: 480px;
+      max-height: 92vh;
+      background: var(--color-card);
+      border-radius: var(--radius-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     @keyframes slideUpModal {
-      from { transform: translateY(100%); opacity: 0.6; }
-      to   { transform: translateY(0);    opacity: 1; }
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
     }
 
-    /* ドラッグハンドル */
-    .modal-sheet::before {
-      content: '';
-      display: block;
+    .modal-overlay:not(.hidden) .modal-sheet {
+      animation: slideUpModal 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+    }
+
+    .modal-handle {
       width: 36px;
       height: 4px;
-      border-radius: var(--radius-full);
-      background-color: var(--color-border);
-      margin: var(--space-sm) auto var(--space-xs);
+      background: var(--color-border);
+      border-radius: 2px;
+      margin: 10px auto 0;
+      flex-shrink: 0;
     }
 
     .modal-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: var(--space-sm) var(--space-md) var(--space-md);
-      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-md) var(--space-md) var(--space-sm);
+      flex-shrink: 0;
     }
 
     .modal-title {
-      font-size: 17px;
+      flex: 1;
+      font-size: 16px;
       font-weight: 700;
       color: var(--color-text);
     }
 
-    .modal-header-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--space-xs);
-    }
-
-    .modal-close-btn,
-    .icon-btn {
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
+      border: none;
+      background: var(--color-bg);
       border-radius: var(--radius-full);
+      cursor: pointer;
       color: var(--color-text-sub);
-      transition: background-color var(--transition-fast), color var(--transition-fast);
+      transition: background 0.15s;
     }
 
-    .modal-close-btn:hover,
-    .icon-btn:hover {
-      background-color: var(--color-bg);
-      color: var(--color-text);
+    .modal-close-btn:hover {
+      background: var(--color-border);
     }
 
-    .modal-close-btn svg,
-    .icon-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* =============================================
-       フォーム共通
-       ============================================= */
-    #add-form,
-    #edit-form {
-      padding: var(--space-md);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-md);
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-xs);
-    }
-
-    .form-group--inline {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: var(--space-sm);
-    }
-
-    .form-icon {
-      color: var(--color-text-sub);
-      flex-shrink: 0;
-      margin-top: 28px; /* label高さ分を考慮 */
-    }
-
-    .form-icon svg,
-    .form-icon {
-      width: 18px;
-      height: 18px;
-    }
-
-    .form-field-content {
+    .modal-body {
+      padding: 0 var(--space-md) calc(var(--space-md) + var(--safe-bottom));
+      overflow-y: auto;
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-xs);
+      scrollbar-width: none;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ─── Form ─── */
+    .form-group {
+      margin-bottom: var(--space-md);
     }
 
     .form-label {
+      display: block;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--color-text-sub);
-      letter-spacing: 0.05em;
+      margin-bottom: var(--space-xs);
+      letter-spacing: 0.5px;
       text-transform: uppercase;
     }
 
-    .form-input {
+    .form-input,
+    .form-textarea {
       width: 100%;
-      height: 42px;
+      padding: 12px var(--space-md);
       border: 1.5px solid var(--color-border);
       border-radius: var(--radius-input);
-      padding: 0 var(--space-sm);
+      font-family: var(--font-main);
       font-size: 15px;
       color: var(--color-text);
-      background-color: var(--color-bg);
+      background: var(--color-bg);
       outline: none;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
     }
 
-    .form-input:focus {
+    .form-input:focus,
+    .form-textarea:focus {
       border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px rgba(230,51,18,0.12);
-    }
-
-    .form-input::placeholder {
-      color: #BBBBBB;
+      box-shadow: 0 0 0 3px rgba(230, 51, 18, 0.1);
     }
 
     .form-textarea {
-      width: 100%;
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-input);
-      padding: var(--space-sm);
-      font-size: 15px;
-      color: var(--color-text);
-      background-color: var(--color-bg);
-      outline: none;
-      resize: vertical;
+      resize: none;
       min-height: 80px;
       line-height: 1.5;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
 
-    .form-textarea:focus {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px rgba(230,51,18,0.12);
-    }
-
-    .form-textarea::placeholder {
-      color: #BBBBBB;
-    }
-
-    /* 日時・場所の表示/入力切替フィールド */
-    .form-display-field {
+    /* Display/Input toggle field */
+    .form-display {
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      min-height: 42px;
-      padding: 0 var(--space-xs);
+      padding: 12px var(--space-md);
+      background: var(--color-bg);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-input);
       cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .form-display:hover {
+      border-color: var(--color-accent);
+    }
+
+    .form-display-icon {
+      font-size: 16px;
+      flex-shrink: 0;
     }
 
     .form-display-value {
       flex: 1;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--color-text);
     }
 
     .form-display-value.placeholder {
-      color: #BBBBBB;
+      color: var(--color-text-sub);
     }
 
-    .form-edit-icon {
+    .form-display-edit {
       color: var(--color-text-sub);
       flex-shrink: 0;
     }
 
-    .form-edit-icon svg {
-      width: 15px;
-      height: 15px;
-    }
-
-    .form-hint {
-      font-size: 12px;
-      color: var(--color-text-sub);
-      min-height: 16px;
-    }
-
-    .form-hint.error {
-      color: var(--color-error);
-    }
-
-    /* 区切り線 */
-    .form-divider {
+    .form-location-loading {
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      color: var(--color-text-sub);
+      padding: 12px var(--space-md);
+      background: var(--color-bg);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-input);
+    }
+
+    .form-location-loading.hidden {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .loading-text {
       font-size: 13px;
+      color: var(--color-text-sub);
     }
 
-    .form-divider::before,
-    .form-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background-color: var(--color-border);
-    }
-
-    /* 写真ボタン */
-    #add-photo-btn {
+    /* Photo button */
+    .photo-btn {
+      width: 100%;
+      padding: 14px;
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-input);
+      background: var(--color-bg);
+      font-family: var(--font-main);
+      font-size: 14px;
+      color: var(--color-text-sub);
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: var(--space-sm);
-      width: 100%;
-      height: 48px;
-      border: 1.5px dashed var(--color-border);
-      border-radius: var(--radius-input);
-      background-color: var(--color-bg);
-      color: var(--color-text-sub);
-      font-size: 14px;
-      font-weight: 500;
-      transition:
-        border-color var(--transition-fast),
-        color var(--transition-fast),
-        background-color var(--transition-fast);
-      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
     }
 
-    #add-photo-btn:hover,
-    #add-photo-btn:active {
+    .photo-btn:hover {
       border-color: var(--color-accent);
       color: var(--color-accent);
-      background-color: rgba(230,51,18,0.04);
     }
 
-    #add-photo-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* ファイルinput（非表示） */
-    #add-photo-file {
-      display: none;
-    }
-
-    /* 位置情報取得中スピナー */
-    .location-loading {
-      display: flex;
-      align-items: center;
-      gap: var(--space-xs);
-      font-size: 13px;
+    .photo-status {
+      margin-top: var(--space-xs);
+      font-size: 12px;
       color: var(--color-text-sub);
+      min-height: 18px;
     }
 
-    .spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--color-border);
-      border-top-color: var(--color-accent);
-      border-radius: var(--radius-full);
-      animation: spin 0.7s linear infinite;
+    .photo-status.error {
+      color: var(--color-error);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* ボタン共通 */
+    /* Form actions */
     .form-actions {
       display: flex;
       gap: var(--space-sm);
-      padding-top: var(--space-xs);
+      padding-top: var(--space-md);
     }
 
     .btn {
       flex: 1;
-      height: 48px;
+      padding: 14px;
       border-radius: var(--radius-btn);
+      font-family: var(--font-main);
       font-size: 15px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition:
-        background-color var(--transition-fast),
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast);
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s, transform 0.15s;
     }
 
     .btn:active {
       transform: scale(0.97);
     }
 
-    .btn--primary {
-      background-color: var(--color-accent);
-      color: #FFFFFF;
-    }
-
-    .btn--primary:hover {
-      background-color: var(--color-accent-dark);
-    }
-
-    .btn--secondary {
-      background-color: var(--color-bg);
+    .btn-ghost {
+      background: var(--color-bg);
       color: var(--color-text-sub);
-      border: 1.5px solid var(--color-border);
     }
 
-    .btn--secondary:hover {
-      background-color: var(--color-border);
+    .btn-ghost:hover {
+      background: var(--color-border);
     }
 
-    .btn--danger {
-      background-color: rgba(239,68,68,0.08);
-      color: var(--color-error);
+    .btn-primary {
+      background: var(--color-accent);
+      color: #fff;
     }
 
-    .btn--danger:hover {
-      background-color: rgba(239,68,68,0.15);
+    .btn-primary:hover {
+      background: var(--color-accent-dark);
     }
 
-    /* =============================================
-       詳細ビュー
-       ============================================= */
-    #detail-view {
-      padding: var(--space-md);
+    .btn-primary:disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .btn-danger {
+      background: var(--color-error);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #DC2626;
+    }
+
+    /* ─── Detail Modal ─── */
+    .detail-row {
       display: flex;
-      flex-direction: column;
-      gap: var(--space-md);
-    }
-
-    .detail-datetime,
-    .detail-location {
-      display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: var(--space-sm);
-      font-size: 15px;
-      color: var(--color-text);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--color-border);
     }
 
-    .detail-icon {
-      color: var(--color-accent);
+    .detail-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .detail-row-icon {
+      color: var(--color-text-sub);
+      margin-top: 2px;
       flex-shrink: 0;
     }
 
-    .detail-icon svg,
-    .detail-icon {
-      width: 17px;
-      height: 17px;
+    .detail-row-body {
+      flex: 1;
     }
 
-    .detail-title h3 {
-      font-size: 20px;
+    .detail-row-label {
+      font-size: 11px;
+      color: var(--color-text-sub);
       font-weight: 700;
-      color: var(--color-text);
-      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .detail-note p {
+    .detail-row-value {
       font-size: 15px;
       color: var(--color-text);
-      line-height: 1.7;
-      white-space: pre-wrap;
+      margin-top: 2px;
+      line-height: 1.5;
     }
 
-    .detail-note p:empty::before {
-      content: 'メモなし';
+    .detail-row-value.empty {
       color: var(--color-text-sub);
       font-style: italic;
     }
 
-    .detail-meta {
+    .detail-header-actions {
       display: flex;
-      align-items: center;
       gap: var(--space-sm);
-      padding-top: var(--space-sm);
-      border-top: 1px solid var(--color-border);
     }
 
-    .detail-created {
-      font-size: 12px;
-      color: var(--color-text-sub);
-      margin-left: auto;
+    .btn-sm {
+      padding: 7px 14px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-main);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
     }
 
-    /* 詳細モーダルの削除ボタン（フォームアクション内） */
-    #edit-form .form-actions {
-      margin-top: var(--space-xs);
+    .btn-sm-outline {
+      background: none;
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text);
     }
 
-    /* =============================================
-       削除確認ダイアログ
-       ============================================= */
-    #confirm-dialog {
+    .btn-sm-outline:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .btn-sm-danger {
+      background: #FFF0EE;
+      color: var(--color-error);
+      border: none;
+    }
+
+    .btn-sm-danger:hover {
+      background: #FFE0DC;
+    }
+
+    /* ─── Confirm Dialog ─── */
+    #confirm-overlay {
       position: fixed;
       inset: 0;
-      z-index: 600;
+      background: var(--color-overlay);
+      z-index: 400;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: var(--space-md);
     }
 
-    #confirm-overlay {
-      position: absolute;
-      inset: 0;
-      background-color: var(--color-overlay);
-      animation: fadeInOverlay var(--transition-normal) forwards;
-    }
-
-    .dialog-box {
-      position: relative;
-      z-index: 1;
-      background-color: var(--color-card);
-      border-radius: var(--radius-card);
-      padding: var(--space-lg);
-      width: 100%;
-      max-width: 320px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-      animation: popIn var(--transition-normal) cubic-bezier(0.34,1.56,0.64,1) forwards;
+    #confirm-overlay.hidden {
+      display: none;
     }
 
     @keyframes popIn {
-      from { transform: scale(0.85); opacity: 0; }
-      to   { transform: scale(1);    opacity: 1; }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
-    .dialog-title {
+    .confirm-dialog {
+      width: 100%;
+      max-width: 320px;
+      background: var(--color-card);
+      border-radius: 16px;
+      padding: var(--space-lg);
+      animation: popIn 0.2s ease forwards;
+    }
+
+    .confirm-title {
       font-size: 17px;
       font-weight: 700;
-      color: var(--color-text);
       margin-bottom: var(--space-sm);
     }
 
-    .dialog-message {
+    .confirm-body {
       font-size: 14px;
       color: var(--color-text-sub);
       margin-bottom: var(--space-lg);
       line-height: 1.5;
     }
 
-    .dialog-actions {
+    .confirm-actions {
       display: flex;
       gap: var(--space-sm);
     }
 
-    /* confirm-yes / confirm-no は Agent 4 が参照 */
-    #confirm-yes {
-      flex: 1;
-      height: 44px;
-      border-radius: var(--radius-btn);
-      background-color: var(--color-error);
-      color: #FFFFFF;
-      font-size: 15px;
-      font-weight: 600;
-      transition: background-color var(--transition-fast), transform var(--transition-fast);
-    }
-
-    #confirm-yes:hover  { background-color: #DC2626; }
-    #confirm-yes:active { transform: scale(0.97); }
-
-    #confirm-no {
-      flex: 1;
-      height: 44px;
-      border-radius: var(--radius-btn);
-      background-color: var(--color-bg);
-      color: var(--color-text-sub);
-      border: 1.5px solid var(--color-border);
-      font-size: 15px;
-      font-weight: 600;
-      transition: background-color var(--transition-fast), transform var(--transition-fast);
-    }
-
-    #confirm-no:hover  { background-color: var(--color-border); }
-    #confirm-no:active { transform: scale(0.97); }
-
-    /* =============================================
-       トースト通知
-       ============================================= */
+    /* ─── Toast ─── */
     #toast {
       position: fixed;
       bottom: calc(80px + var(--safe-bottom));
       left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      z-index: 700;
-      background-color: var(--color-text);
-      color: #FFFFFF;
+      transform: translateX(-50%);
+      z-index: 500;
+      pointer-events: none;
+      width: calc(100% - var(--space-xl));
+      max-width: 440px;
+    }
+
+    .toast-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 12px var(--space-md);
+      border-radius: var(--radius-card);
       font-size: 14px;
       font-weight: 500;
-      padding: var(--space-sm) var(--space-md);
-      border-radius: var(--radius-full);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity var(--transition-normal), transform var(--transition-normal);
-      max-width: calc(100vw - 48px);
-      text-align: center;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      margin-bottom: var(--space-sm);
     }
 
-    #toast.toast--show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .toast-item.success {
+      background: var(--color-success);
     }
 
-    #toast.toast--success {
-      background-color: #16A34A;
+    .toast-item.error {
+      background: var(--color-error);
     }
 
-    #toast.toast--error {
-      background-color: var(--color-error);
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    /* =============================================
-       visually-hidden（アクセシビリティ）
-       ============================================= */
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+
+    .toast-item.entering {
+      animation: toastIn 0.25s ease forwards;
+    }
+
+    .toast-item.leaving {
+      animation: toastOut 0.3s ease forwards;
+    }
+
+    /* ─── Divider ─── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin: var(--space-md) 0;
+      color: var(--color-text-sub);
+      font-size: 12px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
       height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      white-space: nowrap;
-      border: 0;
+      background: var(--color-border);
+    }
+
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
-<body>
 
-  <!-- =============================================
-       メインアプリコンテナ
-       ============================================= -->
+<body>
   <div id="app">
 
-    <!-- ヘッダー -->
-    <header id="header">
-      <div id="header-main">
-        <h1 id="app-title">大谷チェッカー</h1>
-        <button id="search-btn" aria-label="検索" type="button">
-          <i data-lucide="search"></i>
+    <!-- ─── Login Screen ─── -->
+    <div id="login-screen">
+      <div class="login-icon">🏟️</div>
+      <h1 class="login-title">大谷チェッカー</h1>
+      <p class="login-subtitle">大谷翔平の広告を見つけたら<br>記録しよう！</p>
+      <button id="google-signin-btn">
+        <svg class="google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4" />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853" />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            fill="#FBBC05" />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335" />
+        </svg>
+        Googleでログイン
+      </button>
+      <p class="login-note">ログインすることで、どのデバイスからでも<br>あなたの記録にアクセスできます</p>
+    </div>
+
+    <!-- ─── Main App ─── -->
+    <div id="main-app" class="hidden">
+
+      <!-- Header -->
+      <header id="header">
+        <span class="header-title">大谷チェッカー</span>
+        <button class="header-btn" id="search-btn" aria-label="検索">
+          <i data-lucide="search" style="width:18px;height:18px;"></i>
+        </button>
+        <button class="header-btn" id="account-btn" aria-label="アカウント">
+          <i data-lucide="user" style="width:18px;height:18px;"></i>
+        </button>
+      </header>
+
+      <!-- Account Menu -->
+      <div id="account-menu" class="hidden">
+        <div class="account-info">
+          <div class="account-email" id="account-email">loading...</div>
+        </div>
+        <button class="account-menu-item" id="signout-btn">
+          <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+          ログアウト
         </button>
       </div>
 
-      <!-- 検索バー（初期は非表示） -->
+      <!-- Search Bar -->
       <div id="search-bar" class="hidden">
-        <input
-          type="search"
-          id="search-input"
-          placeholder="タイトル・場所・メモで検索..."
-          autocomplete="off"
-          aria-label="記録を検索"
-        />
-        <button id="search-clear-btn" aria-label="検索をクリア" type="button">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-    </header>
-
-    <!-- メインコンテンツ -->
-    <main id="main-content">
-
-      <!-- スケルトンスクリーン（ロード中） -->
-      <div id="skeleton-screen" class="hidden" aria-hidden="true">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
+        <input id="search-input" type="search" placeholder="タイトル・場所・メモで検索…" />
       </div>
 
-      <!-- 目撃記録一覧 -->
-      <div id="sightings-list" role="list" aria-label="大谷広告目撃記録一覧">
-        <!-- 月セクションとカードが動的に挿入される -->
-      </div>
-
-      <!-- 空状態表示（記録が0件のとき） -->
-      <div id="empty-state" class="hidden" aria-live="polite">
-        <div id="empty-state-icon">
-          <i data-lucide="binoculars"></i>
+      <!-- Skeleton -->
+      <div id="skeleton-screen">
+        <div class="skeleton-card">
+          <div class="skeleton-line tall"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
         </div>
-        <p id="empty-state-title">まだ記録がありません</p>
-        <p id="empty-state-subtitle">大谷の広告を見つけたら登録しよう！</p>
+        <div class="skeleton-card">
+          <div class="skeleton-line tall"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+        </div>
       </div>
 
-    </main>
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden">
+        <div class="empty-icon">
+          <i data-lucide="binoculars" style="width:32px;height:32px;"></i>
+        </div>
+        <p class="empty-title">まだ記録がありません</p>
+        <p class="empty-sub">大谷の広告を見つけたら<br>登録しよう！</p>
+      </div>
 
-    <!-- FAB（フローティングアクションボタン） -->
-    <button id="fab" type="button" aria-label="新しい記録を追加">
-      <i data-lucide="plus"></i>
-    </button>
+      <!-- Sightings List -->
+      <div id="sightings-list"></div>
 
-  </div><!-- /#app -->
+      <!-- FAB -->
+      <button id="fab" class="hidden" aria-label="新しい記録を追加">
+        <i data-lucide="plus" style="width:24px;height:24px;"></i>
+      </button>
 
+    </div><!-- /main-app -->
 
-  <!-- =============================================
-       新規登録モーダル（ボトムシート）
-       ============================================= -->
-  <div id="add-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
-    <div class="modal-overlay" id="add-modal-overlay"></div>
-    <div class="modal-sheet">
+  </div><!-- /app -->
 
-      <!-- モーダルヘッダー -->
+  <!-- ─── Add Modal ─── -->
+  <div id="add-modal" class="modal-overlay hidden">
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-label="新しい記録">
+      <div class="modal-handle"></div>
       <div class="modal-header">
-        <h2 class="modal-title" id="add-modal-title">新しい記録</h2>
-        <button class="modal-close-btn" id="add-modal-close" type="button" aria-label="閉じる">
-          <i data-lucide="x"></i>
+        <span class="modal-title">新しい記録</span>
+        <button class="modal-close-btn" id="add-close-btn" aria-label="閉じる">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
         </button>
       </div>
+      <div class="modal-body">
+        <form id="add-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="add-title">タイトル</label>
+            <input id="add-title" class="form-input" type="text" placeholder="例：渋谷の大型ビジョン" autocomplete="off" />
+          </div>
 
-      <!-- フォーム -->
-      <form id="add-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="add-note">メモ</label>
+            <textarea id="add-note" class="form-textarea" placeholder="どんな広告でしたか？"></textarea>
+          </div>
 
-        <!-- タイトル -->
-        <div class="form-group">
-          <label class="form-label" for="add-title">タイトル</label>
-          <input
-            type="text"
-            id="add-title"
-            name="title"
-            class="form-input"
-            placeholder="例：渋谷の大型ビジョン"
-            autocomplete="off"
-          />
-        </div>
-
-        <!-- メモ -->
-        <div class="form-group">
-          <label class="form-label" for="add-note">メモ</label>
-          <textarea
-            id="add-note"
-            name="note"
-            class="form-textarea"
-            rows="3"
-            placeholder="どんな広告でしたか？"
-          ></textarea>
-        </div>
-
-        <!-- 日時（表示 + 隠れたinput） -->
-        <div class="form-group form-group--inline">
-          <i data-lucide="calendar" class="form-icon"></i>
-          <div class="form-field-content">
+          <div class="form-group">
             <label class="form-label">日時</label>
-            <!-- 表示モード -->
-            <div id="add-datetime-display" class="form-display-field">
-              <span class="form-display-value placeholder">取得中...</span>
-              <span class="form-edit-icon"><i data-lucide="pencil"></i></span>
+            <div id="add-datetime-display" class="form-display">
+              <span class="form-display-icon">📅</span>
+              <span class="form-display-value placeholder" id="add-datetime-text">取得中…</span>
+              <i data-lucide="pencil" class="form-display-edit" style="width:14px;height:14px;"></i>
             </div>
-            <!-- 編集モード（.hidden で非表示） -->
-            <input
-              type="datetime-local"
-              id="add-datetime-input"
-              name="datetime"
-              class="form-input hidden"
-            />
+            <input id="add-datetime-input" class="form-input hidden" type="datetime-local" />
           </div>
-        </div>
 
-        <!-- 場所（表示 + 隠れたinput） -->
-        <div class="form-group form-group--inline">
-          <i data-lucide="map-pin" class="form-icon"></i>
-          <div class="form-field-content">
+          <div class="form-group">
             <label class="form-label">場所</label>
-            <!-- 表示モード -->
-            <div id="add-location-display" class="form-display-field">
-              <span class="form-display-value placeholder">
-                <span class="location-loading">
-                  <span class="spinner"></span>
-                  位置情報を取得中...
-                </span>
-              </span>
-              <span class="form-edit-icon"><i data-lucide="pencil"></i></span>
+            <div id="add-location-loading" class="form-location-loading">
+              <div class="spinner"></div>
+              <span class="loading-text">現在地を取得中…</span>
             </div>
-            <!-- 編集モード（.hidden で非表示） -->
-            <input
-              type="text"
-              id="add-location-input"
-              name="location"
-              class="form-input hidden"
-              placeholder="場所を入力..."
-              autocomplete="off"
-            />
-            <!-- 緯度・経度を保持する隠しフィールド -->
-            <input type="hidden" id="add-location-lat" name="location_lat" />
-            <input type="hidden" id="add-location-lng" name="location_lng" />
+            <div id="add-location-display" class="form-display hidden">
+              <span class="form-display-icon">📍</span>
+              <span class="form-display-value placeholder" id="add-location-text">場所を入力してください</span>
+              <i data-lucide="pencil" class="form-display-edit" style="width:14px;height:14px;"></i>
+            </div>
+            <input id="add-location-input" class="form-input hidden" type="text" placeholder="場所を入力"
+              autocomplete="off" />
+            <input id="add-location-lat" type="hidden" />
+            <input id="add-location-lng" type="hidden" />
           </div>
-        </div>
 
-        <!-- 区切り線 -->
-        <div class="form-divider">
-          <span>または</span>
-        </div>
-
-        <!-- 写真から情報を読み取る -->
-        <div class="form-group">
-          <button type="button" id="add-photo-btn">
-            <i data-lucide="camera"></i>
-            写真から情報を読み取る
-          </button>
-          <input
-            type="file"
-            id="add-photo-file"
-            name="photo"
-            accept="image/*"
-            aria-label="写真ファイルを選択してEXIF情報を読み取る"
-          />
-          <p id="add-photo-status" class="form-hint" aria-live="polite"></p>
-        </div>
-
-        <!-- ボタン -->
-        <div class="form-actions">
-          <button type="button" class="btn btn--secondary" id="add-cancel-btn">キャンセル</button>
-          <button type="submit" class="btn btn--primary" id="add-save-btn">保存する</button>
-        </div>
-
-      </form>
-    </div>
-  </div><!-- /#add-modal -->
-
-
-  <!-- =============================================
-       詳細・編集モーダル
-       ============================================= -->
-  <div id="detail-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
-    <div class="modal-overlay" id="detail-modal-overlay"></div>
-    <div class="modal-sheet">
-
-      <!-- モーダルヘッダー -->
-      <div class="modal-header">
-        <h2 class="modal-title" id="detail-modal-title">記録の詳細</h2>
-        <div class="modal-header-actions">
-          <button class="icon-btn" id="detail-edit-btn" type="button" aria-label="編集">
-            <i data-lucide="pencil"></i>
-          </button>
-          <button class="modal-close-btn" id="detail-modal-close" type="button" aria-label="閉じる">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- 詳細表示エリア（閲覧モード） -->
-      <div id="detail-content">
-        <div id="detail-view">
-          <div class="detail-datetime">
-            <i data-lucide="calendar" class="detail-icon"></i>
-            <span id="detail-datetime-text"></span>
+          <div class="form-group">
+            <div class="divider">または</div>
+            <button type="button" id="add-photo-btn" class="photo-btn">
+              <i data-lucide="camera" style="width:18px;height:18px;"></i>
+              写真から情報を読み取る
+            </button>
+            <input id="add-photo-file" type="file" accept="image/*" class="hidden" />
+            <p id="add-photo-status" class="photo-status"></p>
           </div>
-          <div class="detail-location">
-            <i data-lucide="map-pin" class="detail-icon"></i>
-            <span id="detail-location-text"></span>
+
+          <div class="form-actions">
+            <button type="button" id="add-cancel-btn" class="btn btn-ghost">キャンセル</button>
+            <button type="submit" id="add-save-btn" class="btn btn-primary">保存する</button>
           </div>
-          <div class="detail-title">
-            <h3 id="detail-title-text"></h3>
-          </div>
-          <div class="detail-note">
-            <p id="detail-note-text"></p>
-          </div>
-          <div class="detail-meta">
-            <span class="badge" id="detail-source-badge"></span>
-            <span class="detail-created" id="detail-created-text"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 編集フォーム（編集モード、初期は非表示） -->
-      <form id="edit-form" class="hidden" novalidate>
-
-        <!-- 編集対象ID（隠しフィールド） -->
-        <input type="hidden" id="edit-id" name="id" />
-
-        <!-- タイトル -->
-        <div class="form-group">
-          <label class="form-label" for="edit-title">タイトル</label>
-          <input
-            type="text"
-            id="edit-title"
-            name="title"
-            class="form-input"
-            placeholder="例：渋谷の大型ビジョン"
-            autocomplete="off"
-          />
-        </div>
-
-        <!-- メモ -->
-        <div class="form-group">
-          <label class="form-label" for="edit-note">メモ</label>
-          <textarea
-            id="edit-note"
-            name="note"
-            class="form-textarea"
-            rows="3"
-            placeholder="どんな広告でしたか？"
-          ></textarea>
-        </div>
-
-        <!-- 日時 -->
-        <div class="form-group form-group--inline">
-          <i data-lucide="calendar" class="form-icon"></i>
-          <div class="form-field-content">
-            <label class="form-label" for="edit-datetime">日時</label>
-            <input
-              type="datetime-local"
-              id="edit-datetime"
-              name="datetime"
-              class="form-input"
-            />
-          </div>
-        </div>
-
-        <!-- 場所 -->
-        <div class="form-group form-group--inline">
-          <i data-lucide="map-pin" class="form-icon"></i>
-          <div class="form-field-content">
-            <label class="form-label" for="edit-location">場所</label>
-            <input
-              type="text"
-              id="edit-location"
-              name="location"
-              class="form-input"
-              placeholder="場所を入力..."
-              autocomplete="off"
-            />
-            <input type="hidden" id="edit-location-lat" name="location_lat" />
-            <input type="hidden" id="edit-location-lng" name="location_lng" />
-          </div>
-        </div>
-
-        <!-- ボタン -->
-        <div class="form-actions">
-          <button type="button" class="btn btn--danger" id="detail-delete-btn">削除</button>
-          <button type="submit" class="btn btn--primary" id="edit-save-btn">保存する</button>
-        </div>
-
-      </form>
-
-    </div>
-  </div><!-- /#detail-modal -->
-
-
-  <!-- =============================================
-       削除確認ダイアログ
-       ============================================= -->
-  <div id="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title" class="hidden">
-    <div class="modal-overlay" id="confirm-overlay"></div>
-    <div class="dialog-box">
-      <h3 class="dialog-title" id="confirm-dialog-title">記録を削除しますか？</h3>
-      <p class="dialog-message">この操作は取り消せません。</p>
-      <div class="dialog-actions">
-        <button type="button" id="confirm-no">キャンセル</button>
-        <button type="button" id="confirm-yes">削除する</button>
+        </form>
       </div>
     </div>
-  </div><!-- /#confirm-dialog -->
-
-
-  <!-- =============================================
-       トースト通知
-       ============================================= -->
-  <div id="toast" role="status" aria-live="polite" aria-atomic="true" class="hidden">
-    <span id="toast-message"></span>
   </div>
 
+  <!-- ─── Detail Modal ─── -->
+  <div id="detail-modal" class="modal-overlay hidden">
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-label="記録の詳細">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title" id="detail-modal-title">詳細</span>
+        <div class="detail-header-actions">
+          <button class="btn-sm btn-sm-outline hidden" id="detail-edit-btn">編集</button>
+          <button class="btn-sm btn-sm-danger hidden" id="detail-delete-btn">削除</button>
+          <button class="modal-close-btn" id="detail-close-btn" aria-label="閉じる">
+            <i data-lucide="x" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <!-- Detail view -->
+        <div id="detail-view"></div>
 
-  <!-- =============================================
-       JavaScript
-       ============================================= -->
-  <script>
-    /*
-     * =============================================
-     * 定数・設定
-     * =============================================
-     */
-    const DB_NAME    = 'OhtaniCheckerDB';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'sightings';
+        <!-- Edit form -->
+        <form id="detail-form" class="hidden" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="edit-title">タイトル</label>
+            <input id="edit-title" class="form-input" type="text" placeholder="例：渋谷の大型ビジョン" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-note">メモ</label>
+            <textarea id="edit-note" class="form-textarea" placeholder="どんな広告でしたか？"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-datetime">日時</label>
+            <input id="edit-datetime" class="form-input" type="datetime-local" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-location">場所</label>
+            <input id="edit-location" class="form-input" type="text" placeholder="場所を入力" autocomplete="off" />
+          </div>
+          <div class="form-actions">
+            <button type="button" id="edit-cancel-btn" class="btn btn-ghost">キャンセル</button>
+            <button type="submit" id="edit-save-btn" class="btn btn-primary">更新する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-    /*
-     * =============================================
-     * IndexedDB 初期化・CRUD
-     * =============================================
-     */
+  <!-- ─── Confirm Dialog ─── -->
+  <div id="confirm-overlay" class="hidden">
+    <div class="confirm-dialog">
+      <p class="confirm-title">削除しますか？</p>
+      <p class="confirm-body">この記録を削除します。この操作は取り消せません。</p>
+      <div class="confirm-actions">
+        <button id="confirm-no" class="btn btn-ghost">キャンセル</button>
+        <button id="confirm-yes" class="btn btn-danger">削除する</button>
+      </div>
+    </div>
+  </div>
 
-    function openDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+  <!-- ─── Toast ─── -->
+  <div id="toast"></div>
 
-        request.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-            store.createIndex('datetime', 'datetime', { unique: false });
-          }
-        };
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-        request.onsuccess = (event) => resolve(event.target.result);
-        request.onerror   = (event) => reject(event.target.error);
+    /* =============================================
+       Supabase 設定
+       ============================================= */
+    const SUPABASE_URL = 'https://wkfxbgidlojjbtsuyoea.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_eNDt0aCRCX7ChUUB_QRfrQ_ghDKS_i8';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    /* =============================================
+       状態管理
+       ============================================= */
+    let allSightings = [];
+    let currentUser = null;
+    let pendingDeleteId = null;
+    let editingId = null;
+
+    /* =============================================
+       認証
+       ============================================= */
+    async function signInWithGoogle() {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: 'https://madppp.github.io/ohtani-checker/' }
       });
+      if (error) showToast('ログインに失敗しました: ' + error.message, 'error');
     }
 
+    async function signOut() {
+      await supabase.auth.signOut();
+    }
+
+    function showLoginScreen() {
+      currentUser = null;
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('main-app').classList.add('hidden');
+      document.getElementById('fab').classList.add('hidden');
+    }
+
+    function showMainApp(user) {
+      currentUser = user;
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('account-email').textContent = user.email || user.user_metadata?.full_name || 'ログイン済み';
+      loadSightings();
+    }
+
+    /* =============================================
+       データ操作（Supabase）
+       ============================================= */
     async function getAllSightings() {
-      try {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx      = db.transaction(STORE_NAME, 'readonly');
-          const store   = tx.objectStore(STORE_NAME);
-          const index   = store.index('datetime');
-          const request = index.openCursor(null, 'prev');
-          const results = [];
-          request.onsuccess = (event) => {
-            const cursor = event.target.result;
-            if (cursor) { results.push(cursor.value); cursor.continue(); }
-            else         resolve(results);
-          };
-          request.onerror = (event) => reject(event.target.error);
-        });
-      } catch (err) {
-        console.error('getAllSightings failed:', err);
-        return [];
-      }
+      const { data, error } = await supabase
+        .from('sightings')
+        .select('*')
+        .order('datetime', { ascending: false });
+      if (error) throw error;
+      return data || [];
     }
 
-    async function getSighting(id) {
-      try {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx      = db.transaction(STORE_NAME, 'readonly');
-          const store   = tx.objectStore(STORE_NAME);
-          const request = store.get(id);
-          request.onsuccess = (event) => resolve(event.target.result);
-          request.onerror   = (event) => reject(event.target.error);
-        });
-      } catch (err) {
-        console.error('getSighting failed:', err);
-        return undefined;
-      }
+    async function createSighting(sightingData) {
+      const { data, error } = await supabase
+        .from('sightings')
+        .insert({ ...sightingData, user_id: currentUser.id })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
     }
 
-    async function createSighting(data) {
-      const now = new Date().toISOString();
-      const record = { ...data, id: crypto.randomUUID(), createdAt: now, updatedAt: now };
-      try {
-        const db = await openDB();
-        await new Promise((resolve, reject) => {
-          const tx      = db.transaction(STORE_NAME, 'readwrite');
-          const store   = tx.objectStore(STORE_NAME);
-          const request = store.add(record);
-          request.onsuccess = () => resolve();
-          request.onerror   = (event) => reject(event.target.error);
-        });
-        return record;
-      } catch (err) {
-        console.error('createSighting failed:', err);
-        throw err;
-      }
-    }
-
-    async function updateSighting(id, data) {
-      try {
-        const existing = await getSighting(id);
-        if (!existing) throw new Error(`Sighting not found: ${id}`);
-        const updated = {
-          ...existing, ...data,
-          id,
-          createdAt: existing.createdAt,
-          updatedAt: new Date().toISOString(),
-        };
-        const db = await openDB();
-        await new Promise((resolve, reject) => {
-          const tx      = db.transaction(STORE_NAME, 'readwrite');
-          const store   = tx.objectStore(STORE_NAME);
-          const request = store.put(updated);
-          request.onsuccess = () => resolve();
-          request.onerror   = (event) => reject(event.target.error);
-        });
-        return updated;
-      } catch (err) {
-        console.error('updateSighting failed:', err);
-        throw err;
-      }
+    async function updateSighting(id, updates) {
+      const { data, error } = await supabase
+        .from('sightings')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
     }
 
     async function deleteSighting(id) {
-      try {
-        const db = await openDB();
-        await new Promise((resolve, reject) => {
-          const tx      = db.transaction(STORE_NAME, 'readwrite');
-          const store   = tx.objectStore(STORE_NAME);
-          const request = store.delete(id);
-          request.onsuccess = () => resolve();
-          request.onerror   = (event) => reject(event.target.error);
-        });
-      } catch (err) {
-        console.error('deleteSighting failed:', err);
-        throw err;
-      }
+      const { error } = await supabase
+        .from('sightings')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
     }
 
-    /*
-     * =============================================
-     * 位置情報・EXIFユーティリティ
-     * =============================================
-     */
-
+    /* =============================================
+       位置情報
+       ============================================= */
     async function reverseGeocode(lat, lng) {
       try {
         const res = await fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
           { headers: { 'Accept-Language': 'ja' } }
         );
-        if (!res.ok) throw new Error(`Nominatim HTTP ${res.status}`);
         const data = await res.json();
-        return (
-          data.address?.city    ||
-          data.address?.town    ||
-          data.address?.village ||
-          data.address?.county  ||
-          data.display_name     ||
-          `${lat},${lng}`
-        );
-      } catch (err) {
-        console.warn('reverseGeocode failed:', err);
-        return `${lat},${lng}`;
+        return data.address?.city || data.address?.town || data.address?.village || data.display_name || `${lat.toFixed(4)},${lng.toFixed(4)}`;
+      } catch {
+        return `${lat.toFixed(4)},${lng.toFixed(4)}`;
       }
     }
 
     async function getCurrentPosition() {
-      try {
-        const pos = await new Promise((resolve, reject) =>
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-          })
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) { resolve(null); return; }
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const label = await reverseGeocode(lat, lng);
+            resolve({ lat, lng, label });
+          },
+          () => resolve(null),
+          { enableHighAccuracy: true, timeout: 10000 }
         );
-        const lat   = pos.coords.latitude;
-        const lng   = pos.coords.longitude;
-        const label = await reverseGeocode(lat, lng);
-        return { lat, lng, label };
-      } catch (err) {
-        console.warn('getCurrentPosition failed:', err);
-        return { lat: null, lng: null, label: '' };
-      }
+      });
     }
 
+    /* =============================================
+       EXIF解析
+       ============================================= */
     async function extractPhotoMetadata(file) {
       try {
         const result = await exifr.parse(file, {
           gps: true,
           pick: ['DateTimeOriginal', 'GPSLatitude', 'GPSLongitude']
         });
+        if (!result) return { datetime: null, location: null };
 
-        if (!result) {
-          return { datetime: null, location: null };
-        }
-
-        // 日時: DateTimeOriginal は Date オブジェクトまたは文字列 "2025:03:29 14:30:00"
         let datetime = null;
         if (result.DateTimeOriginal) {
           const d = result.DateTimeOriginal instanceof Date
             ? result.DateTimeOriginal
             : new Date(result.DateTimeOriginal.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3'));
-          if (!isNaN(d.getTime())) {
-            datetime = d.toISOString();
-          }
+          if (!isNaN(d.getTime())) datetime = d.toISOString();
         }
 
-        // GPS: exifr.parse with gps:true で lat/lng が直接返る
         let location = null;
         if (result.latitude != null && result.longitude != null) {
-          const lat = result.latitude;
-          const lng = result.longitude;
-          const label = await reverseGeocode(lat, lng);
-          location = { lat, lng, label };
+          const label = await reverseGeocode(result.latitude, result.longitude);
+          location = { lat: result.latitude, lng: result.longitude, label };
         }
 
         return { datetime, location };
-
       } catch (e) {
         console.warn('EXIF解析エラー:', e);
         return { datetime: null, location: null };
       }
     }
 
-    /*
-     * =============================================
-     * 日時フォーマット
-     * =============================================
-     */
-
+    /* =============================================
+       日時フォーマット
+       ============================================= */
     const WEEKDAY_JA = ['日', '月', '火', '水', '木', '金', '土'];
 
     function formatDatetime(isoString) {
       if (!isoString) return '';
-      try {
-        const d = new Date(isoString);
-        if (isNaN(d.getTime())) return isoString;
-        const year  = d.getFullYear();
-        const month = d.getMonth() + 1;
-        const day   = d.getDate();
-        const wday  = WEEKDAY_JA[d.getDay()];
-        const hh    = String(d.getHours()).padStart(2, '0');
-        const mm    = String(d.getMinutes()).padStart(2, '0');
-        return `${year}年${month}月${day}日（${wday}）${hh}:${mm}`;
-      } catch { return isoString; }
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      const wday = WEEKDAY_JA[d.getDay()];
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${year}年${month}月${day}日（${wday}）${hh}:${mm}`;
     }
 
-    function formatRelative(isoString) {
+    function formatCardDatetime(isoString) {
       if (!isoString) return '';
-      try {
-        const d      = new Date(isoString);
-        if (isNaN(d.getTime())) return isoString;
-        const now    = new Date();
-        const diffMs  = now - d;
-        const diffMin = Math.floor(diffMs / 60000);
-        const diffH   = Math.floor(diffMs / 3600000);
-        const diffD   = Math.floor(diffMs / 86400000);
-        if (diffMin < 1)   return 'たった今';
-        if (diffMin < 60)  return `${diffMin}分前`;
-        if (diffH   < 24)  return `${diffH}時間前`;
-        if (diffD   === 1) return '昨日';
-        if (diffD   < 7)   return `${diffD}日前`;
-        return formatDatetime(isoString);
-      } catch { return isoString; }
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      const day = d.getDate();
+      const wday = WEEKDAY_JA[d.getDay()];
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${day}（${wday}）${hh}:${mm}`;
+    }
+
+    function formatMonthSection(isoString) {
+      if (!isoString) return '';
+      const d = new Date(isoString);
+      return `${d.getFullYear()}年${d.getMonth() + 1}月`;
     }
 
     function toDatetimeLocal(isoString) {
       if (!isoString) return '';
+      return isoString.slice(0, 16);
+    }
+
+    /* =============================================
+       データ読み込み
+       ============================================= */
+    async function loadSightings() {
+      showSkeleton();
       try {
-        const d = new Date(isoString);
-        if (isNaN(d.getTime())) return '';
-        const year  = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day   = String(d.getDate()).padStart(2, '0');
-        const hh    = String(d.getHours()).padStart(2, '0');
-        const mm    = String(d.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hh}:${mm}`;
-      } catch { return ''; }
-    }
-
-    function fromDatetimeLocal(localString) {
-      if (!localString) return '';
-      try {
-        const d = new Date(localString);
-        if (isNaN(d.getTime())) return '';
-        return d.toISOString();
-      } catch { return ''; }
-    }
-
-    /*
-     * =============================================
-     * UI レンダリング
-     * =============================================
-     */
-
-    /**
-     * 月キー "2025-03" を日本語 "2025年3月" に変換
-     */
-    function monthKeyToLabel(key) {
-      const [y, m] = key.split('-');
-      return `${y}年${Number(m)}月`;
-    }
-
-    /**
-     * sighting オブジェクトからカード要素を生成して返す
-     */
-    function renderSightingCard(sighting) {
-      const el = document.createElement('div');
-      el.className = 'sighting-card';
-      el.setAttribute('role', 'listitem');
-      el.dataset.id = sighting.id;
-
-      // 日付・時刻パーツを分解
-      let dateLabel = '';
-      let timeLabel = '';
-      if (sighting.datetime) {
-        const d    = new Date(sighting.datetime);
-        const day  = d.getDate();
-        const wday = WEEKDAY_JA[d.getDay()];
-        const hh   = String(d.getHours()).padStart(2, '0');
-        const mm   = String(d.getMinutes()).padStart(2, '0');
-        dateLabel = `${day}（${wday}）`;
-        timeLabel = `${hh}:${mm}`;
+        allSightings = await getAllSightings();
+        renderSightingsList(allSightings);
+      } catch (e) {
+        console.error('データ取得エラー:', e);
+        showToast('データの読み込みに失敗しました', 'error');
+      } finally {
+        hideSkeleton();
+        document.getElementById('fab').classList.remove('hidden');
       }
-
-      const locationLabel = sighting.location?.label || '';
-      const title         = sighting.title || '';
-      const source        = sighting.source || 'text';
-      const badgeClass    = source === 'photo' ? 'badge--photo' : 'badge--text';
-      const badgeText     = source === 'photo' ? '📷 photo' : '✏️ text';
-      const relTime       = formatRelative(sighting.datetime);
-
-      el.innerHTML = `
-        <div class="card-date-row">
-          <span class="card-date">${dateLabel}</span>
-          <span class="card-time">${timeLabel}</span>
-        </div>
-        ${locationLabel ? `
-        <div class="card-location">
-          <i data-lucide="map-pin"></i>
-          ${locationLabel}
-        </div>` : ''}
-        ${title ? `<p class="card-title">${title}</p>` : ''}
-        <div class="card-footer">
-          <span class="badge ${badgeClass}">${badgeText}</span>
-          <span class="card-relative-time">${relTime}</span>
-        </div>
-      `;
-
-      return el;
     }
 
-    /**
-     * sightings 配列を月セクションに分けてリストをレンダリングする
-     * @param {Array} sightings - getAllSightings() の結果
-     * @param {string} [query]  - 検索クエリ（フィルタリング用）
-     */
+    /* =============================================
+       リストレンダリング
+       ============================================= */
+    function filterSightings(sightings, query) {
+      if (!query) return sightings;
+      const q = query.toLowerCase();
+      return sightings.filter(s =>
+        s.title?.toLowerCase().includes(q) ||
+        s.location_label?.toLowerCase().includes(q) ||
+        s.note?.toLowerCase().includes(q)
+      );
+    }
+
     function renderSightingsList(sightings, query = '') {
       const list = document.getElementById('sightings-list');
       const empty = document.getElementById('empty-state');
-      list.innerHTML = '';
+      const filtered = filterSightings(sightings, query);
 
-      // フィルタリング
-      let filtered = sightings;
-      if (query.trim()) {
-        const q = query.trim().toLowerCase();
-        filtered = sightings.filter(s =>
-          (s.title  || '').toLowerCase().includes(q) ||
-          (s.note   || '').toLowerCase().includes(q) ||
-          (s.location?.label || '').toLowerCase().includes(q)
-        );
-      }
+      list.innerHTML = '';
 
       if (filtered.length === 0) {
         empty.classList.remove('hidden');
@@ -1801,492 +1485,394 @@
       }
       empty.classList.add('hidden');
 
-      // 月別にグループ化
+      // 月別グループ
       const groups = new Map();
       for (const s of filtered) {
-        const d = s.datetime ? new Date(s.datetime) : new Date(s.createdAt);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const key = formatMonthSection(s.datetime);
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(s);
       }
 
-      for (const [key, items] of groups) {
-        const section = document.createElement('section');
+      for (const [month, items] of groups) {
+        const section = document.createElement('div');
         section.className = 'month-section';
 
-        const header = document.createElement('h2');
+        const header = document.createElement('div');
         header.className = 'month-header';
-        header.innerHTML = `${monthKeyToLabel(key)}<span class="month-count">${items.length}件</span>`;
+        header.innerHTML = `
+        <span class="month-label">${month}</span>
+        <span class="month-count">${items.length}件</span>
+      `;
         section.appendChild(header);
 
-        for (const sighting of items) {
-          const card = renderSightingCard(sighting);
-          section.appendChild(card);
+        for (const item of items) {
+          section.appendChild(renderSightingCard(item));
         }
-
         list.appendChild(section);
       }
-
-      // Lucide アイコンを再初期化
-      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    /**
-     * スケルトンスクリーンを表示する
-     */
+    function renderSightingCard(s) {
+      const card = document.createElement('div');
+      card.className = 'sighting-card';
+      card.dataset.id = s.id;
+
+      const locationHtml = s.location_label
+        ? `<div class="card-location"><i data-lucide="map-pin" style="width:11px;height:11px;"></i>${s.location_label}</div>`
+        : '';
+      const titleHtml = s.title
+        ? `<div class="card-title">${escapeHtml(s.title)}</div>`
+        : '';
+
+      card.innerHTML = `
+      <div class="card-datetime">${formatCardDatetime(s.datetime)}</div>
+      ${locationHtml}
+      ${titleHtml}
+      <span class="badge badge--${s.source}">${s.source}</span>
+    `;
+      card.addEventListener('click', () => openDetailModal(s));
+      return card;
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* =============================================
+       スケルトン
+       ============================================= */
     function showSkeleton() {
       document.getElementById('skeleton-screen').classList.remove('hidden');
-      document.getElementById('sightings-list').classList.add('hidden');
+      document.getElementById('sightings-list').innerHTML = '';
       document.getElementById('empty-state').classList.add('hidden');
     }
-
-    /**
-     * スケルトンスクリーンを隠す
-     */
     function hideSkeleton() {
       document.getElementById('skeleton-screen').classList.add('hidden');
-      document.getElementById('sightings-list').classList.remove('hidden');
     }
 
-    /**
-     * 新規登録モーダルを表示する
-     */
+    /* =============================================
+       Add Modal
+       ============================================= */
     function showAddModal() {
       const modal = document.getElementById('add-modal');
       modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      // タイトルにフォーカス
-      setTimeout(() => document.getElementById('add-title').focus(), 300);
-    }
-
-    /**
-     * 新規登録モーダルを閉じる
-     */
-    function hideAddModal() {
-      const modal = document.getElementById('add-modal');
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
-      // フォームリセット
-      document.getElementById('add-form').reset();
+      document.getElementById('add-title').value = '';
+      document.getElementById('add-note').value = '';
       document.getElementById('add-photo-status').textContent = '';
-      // 日時・場所の表示をリセット
-      const dtDisplay = document.getElementById('add-datetime-display');
-      dtDisplay.querySelector('.form-display-value').textContent = '';
-      dtDisplay.querySelector('.form-display-value').classList.add('placeholder');
-      document.getElementById('add-datetime-input').classList.add('hidden');
-      dtDisplay.classList.remove('hidden');
-
-      const locDisplay = document.getElementById('add-location-display');
-      locDisplay.querySelector('.form-display-value').innerHTML = `
-        <span class="location-loading">
-          <span class="spinner"></span>
-          位置情報を取得中...
-        </span>`;
-      document.getElementById('add-location-input').classList.add('hidden');
-      locDisplay.classList.remove('hidden');
-      document.getElementById('add-location-lat').value = '';
-      document.getElementById('add-location-lng').value = '';
-    }
-
-    /**
-     * 詳細モーダルを表示する
-     * @param {Object} sighting
-     */
-    function showDetailModal(sighting) {
-      const modal = document.getElementById('detail-modal');
-
-      // 詳細ビューを埋める
-      document.getElementById('detail-datetime-text').textContent =
-        formatDatetime(sighting.datetime);
-      document.getElementById('detail-location-text').textContent =
-        sighting.location?.label || '場所未設定';
-      document.getElementById('detail-title-text').textContent =
-        sighting.title || '（タイトルなし）';
-      document.getElementById('detail-note-text').textContent =
-        sighting.note || '';
-      document.getElementById('detail-created-text').textContent =
-        `登録: ${formatRelative(sighting.createdAt)}`;
-
-      const badge = document.getElementById('detail-source-badge');
-      if (sighting.source === 'photo') {
-        badge.textContent = '📷 photo';
-        badge.className   = 'badge badge--photo';
-      } else {
-        badge.textContent = '✏️ text';
-        badge.className   = 'badge badge--text';
-      }
-
-      // 詳細ビューを表示、編集フォームを隠す
-      document.getElementById('detail-view').style.display  = '';
-      document.getElementById('edit-form').classList.add('hidden');
-      document.getElementById('detail-edit-btn').style.display = '';
-      document.getElementById('detail-modal-title').textContent = '記録の詳細';
-
-      // IDをモーダルに持たせる（Agent 4 が参照）
-      modal.dataset.sightingId = sighting.id;
-
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    /**
-     * 詳細モーダルを編集モードに切り替える
-     * @param {Object} sighting
-     */
-    function switchToEditMode(sighting) {
-      document.getElementById('detail-view').style.display  = 'none';
-      document.getElementById('edit-form').classList.remove('hidden');
-      document.getElementById('detail-edit-btn').style.display = 'none';
-      document.getElementById('detail-modal-title').textContent = '記録を編集';
-
-      document.getElementById('edit-id').value       = sighting.id;
-      document.getElementById('edit-title').value    = sighting.title  || '';
-      document.getElementById('edit-note').value     = sighting.note   || '';
-      document.getElementById('edit-datetime').value = toDatetimeLocal(sighting.datetime);
-      document.getElementById('edit-location').value = sighting.location?.label || '';
-      document.getElementById('edit-location-lat').value = sighting.location?.lat ?? '';
-      document.getElementById('edit-location-lng').value = sighting.location?.lng ?? '';
-    }
-
-    /**
-     * 詳細モーダルを閉じる
-     */
-    function hideDetailModal() {
-      const modal = document.getElementById('detail-modal');
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
-      delete modal.dataset.sightingId;
-    }
-
-    /**
-     * トースト通知を表示する
-     * @param {string} message
-     * @param {'success'|'error'|''} type
-     * @param {number} duration - ミリ秒（デフォルト2000）
-     */
-    let _toastTimer = null;
-    function showToast(message, type = '', duration = 2000) {
-      const toast   = document.getElementById('toast');
-      const msgEl   = document.getElementById('toast-message');
-
-      // 前のタイマーをキャンセル
-      if (_toastTimer) clearTimeout(_toastTimer);
-
-      msgEl.textContent = message;
-      toast.classList.remove('hidden', 'toast--success', 'toast--error', 'toast--show');
-
-      if (type === 'success') toast.classList.add('toast--success');
-      if (type === 'error')   toast.classList.add('toast--error');
-
-      // 次のフレームで表示アニメーション開始
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => toast.classList.add('toast--show'));
-      });
-
-      _toastTimer = setTimeout(() => {
-        toast.classList.remove('toast--show');
-        setTimeout(() => toast.classList.add('hidden'), 300);
-      }, duration);
-    }
-
-    /*
-     * =============================================
-     * グローバル状態
-     * =============================================
-     */
-
-    let allSightings = [];          // 全件キャッシュ
-    let _pendingDeleteId = null;    // 削除確認ダイアログ用
-
-    /*
-     * =============================================
-     * 日時フィールドヘルパー（新規登録モーダル）
-     * =============================================
-     */
-
-    /** 新規登録モーダルの日時を設定する */
-    function setAddDatetime(isoString) {
-      const display  = document.getElementById('add-datetime-display');
-      const input    = document.getElementById('add-datetime-input');
-      const valueEl  = display.querySelector('.form-display-value');
-      const formatted = formatDatetime(isoString);
-      valueEl.textContent = formatted;
-      valueEl.classList.remove('placeholder');
-      input.value = toDatetimeLocal(isoString);
-    }
-
-    /** 新規登録モーダルの場所を設定する */
-    function setAddLocation(pos) {
-      const display  = document.getElementById('add-location-display');
-      const valueEl  = display.querySelector('.form-display-value');
-      if (pos && pos.label) {
-        valueEl.textContent = pos.label;
-        valueEl.classList.remove('placeholder');
-      } else {
-        valueEl.textContent = '場所を取得できませんでした。手動で入力してください';
-        valueEl.classList.add('placeholder');
-      }
-      document.getElementById('add-location-input').value = pos?.label || '';
-      document.getElementById('add-location-lat').value   = pos?.lat   ?? '';
-      document.getElementById('add-location-lng').value   = pos?.lng   ?? '';
-    }
-
-    /** 位置情報取得中スピナーを表示する */
-    function showLocationLoading() {
-      const display = document.getElementById('add-location-display');
-      const valueEl = display.querySelector('.form-display-value');
-      valueEl.innerHTML = `
-        <span class="location-loading">
-          <span class="spinner"></span>
-          位置情報を取得中...
-        </span>`;
-      valueEl.classList.add('placeholder');
-    }
-
-    /** 位置情報取得中スピナーを非表示にする */
-    function hideLocationLoading() {
-      // setAddLocation() が上書きするので、まだ値がなければデフォルトメッセージにする
-      const valueEl = document.getElementById('add-location-display')
-                        .querySelector('.form-display-value');
-      if (valueEl.querySelector('.spinner')) {
-        valueEl.innerHTML  = '';
-        valueEl.textContent = '';
-        valueEl.classList.add('placeholder');
-      }
-    }
-
-    /*
-     * =============================================
-     * FAB 開くフロー（Geolocation + 現在時刻）
-     * =============================================
-     */
-
-    async function openAddModal() {
-      showAddModal();
+      document.getElementById('add-photo-status').classList.remove('error');
+      document.getElementById('add-photo-file').value = '';
+      document.getElementById('add-photo-file').dataset.source = 'text';
 
       // 現在時刻をセット
-      setAddDatetime(new Date().toISOString());
+      const now = new Date().toISOString();
+      setAddDatetime(now);
 
-      // Geolocation取得
+      // Geolocation
       showLocationLoading();
-      try {
-        const pos = await getCurrentPosition();
-        if (pos && pos.label) {
+      getCurrentPosition().then(pos => {
+        hideLocationLoading();
+        if (pos) {
           setAddLocation(pos);
         } else {
-          setAddLocation(null);
+          setAddLocation({ lat: null, lng: null, label: '' });
+          showToast('場所を取得できませんでした。手動で入力してください', 'error');
         }
-      } catch (e) {
-        setAddLocation(null);
-      } finally {
-        hideLocationLoading();
-      }
+      });
     }
 
-    /*
-     * =============================================
-     * 一覧の再読み込みヘルパー
-     * =============================================
-     */
-
-    async function reloadSightings() {
-      try {
-        allSightings = await getAllSightings();
-        const query  = document.getElementById('search-input').value;
-        renderSightingsList(allSightings, query);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      } catch (err) {
-        console.error('reloadSightings failed:', err);
-        showToast('データの読み込みに失敗しました', 'error');
-      }
+    function hideAddModal() {
+      document.getElementById('add-modal').classList.add('hidden');
     }
 
-    /*
-     * =============================================
-     * フォームデータ取得ヘルパー
-     * =============================================
-     */
+    function setAddDatetime(isoString) {
+      const display = document.getElementById('add-datetime-display');
+      const input = document.getElementById('add-datetime-input');
+      const text = document.getElementById('add-datetime-text');
 
-    /** 新規登録フォームからデータオブジェクトを組み立てる */
-    function buildAddFormData() {
-      const title    = document.getElementById('add-title').value.trim();
-      const note     = document.getElementById('add-note').value.trim();
-      const dtInput  = document.getElementById('add-datetime-input');
-      const locInput = document.getElementById('add-location-input');
-      const lat      = document.getElementById('add-location-lat').value;
-      const lng      = document.getElementById('add-location-lng').value;
+      input.value = toDatetimeLocal(isoString);
+      text.textContent = formatDatetime(isoString);
+      text.classList.remove('placeholder');
+      display.classList.remove('hidden');
+      input.classList.add('hidden');
+    }
 
-      // 日時: datetime-inputが隠れていなければその値、なければdisplayから推定
-      let datetime = '';
-      if (!dtInput.classList.contains('hidden') && dtInput.value) {
-        datetime = fromDatetimeLocal(dtInput.value);
-      } else if (dtInput.value) {
-        datetime = fromDatetimeLocal(dtInput.value);
+    function showLocationLoading() {
+      document.getElementById('add-location-loading').classList.remove('hidden');
+      document.getElementById('add-location-display').classList.add('hidden');
+      document.getElementById('add-location-input').classList.add('hidden');
+    }
+
+    function hideLocationLoading() {
+      document.getElementById('add-location-loading').classList.add('hidden');
+    }
+
+    function setAddLocation(pos) {
+      const display = document.getElementById('add-location-display');
+      const input = document.getElementById('add-location-input');
+      const text = document.getElementById('add-location-text');
+
+      document.getElementById('add-location-lat').value = pos.lat ?? '';
+      document.getElementById('add-location-lng').value = pos.lng ?? '';
+      input.value = pos.label || '';
+
+      if (pos.label) {
+        text.textContent = pos.label;
+        text.classList.remove('placeholder');
       } else {
-        datetime = new Date().toISOString();
+        text.textContent = '場所を入力してください';
+        text.classList.add('placeholder');
       }
+      display.classList.remove('hidden');
+      input.classList.add('hidden');
+    }
 
-      // 場所
-      const locationLabel = locInput.classList.contains('hidden')
-        ? document.getElementById('add-location-display')
-            .querySelector('.form-display-value').textContent.trim()
-        : locInput.value.trim();
+    function buildAddFormData() {
+      const datetimeInput = document.getElementById('add-datetime-input');
+      const locationInput = document.getElementById('add-location-input');
+      const source = document.getElementById('add-photo-file').dataset.source || 'text';
+
+      const datetimeVal = datetimeInput.classList.contains('hidden')
+        ? (datetimeInput.value ? new Date(datetimeInput.value).toISOString() : new Date().toISOString())
+        : (datetimeInput.value ? new Date(datetimeInput.value).toISOString() : new Date().toISOString());
+
+      const locationVal = locationInput.value.trim();
+      const lat = parseFloat(document.getElementById('add-location-lat').value) || null;
+      const lng = parseFloat(document.getElementById('add-location-lng').value) || null;
 
       return {
-        title,
-        note,
-        datetime,
-        location: {
-          lat:   lat   ? parseFloat(lat)   : null,
-          lng:   lng   ? parseFloat(lng)   : null,
-          label: locationLabel || '',
-        },
-        source: 'text',
+        title: document.getElementById('add-title').value.trim() || null,
+        note: document.getElementById('add-note').value.trim() || null,
+        datetime: datetimeVal,
+        lat: lat,
+        lng: lng,
+        location_label: locationVal || null,
+        source,
       };
     }
 
-    /*
-     * =============================================
-     * イベントハンドラ・統合処理
-     * =============================================
-     */
+    /* =============================================
+       Detail Modal
+       ============================================= */
+    function openDetailModal(s) {
+      editingId = s.id;
 
+      document.getElementById('detail-modal-title').textContent = '詳細';
+      document.getElementById('detail-view').classList.remove('hidden');
+      document.getElementById('detail-form').classList.add('hidden');
+      document.getElementById('detail-edit-btn').classList.remove('hidden');
+      document.getElementById('detail-delete-btn').classList.remove('hidden');
+
+      // 詳細ビュー構築
+      const view = document.getElementById('detail-view');
+      view.innerHTML = `
+      <div class="detail-row">
+        <div class="detail-row-icon"><i data-lucide="calendar" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-body">
+          <div class="detail-row-label">日時</div>
+          <div class="detail-row-value">${formatDatetime(s.datetime)}</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row-icon"><i data-lucide="map-pin" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-body">
+          <div class="detail-row-label">場所</div>
+          <div class="detail-row-value ${s.location_label ? '' : 'empty'}">${escapeHtml(s.location_label) || '未設定'}</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row-icon"><i data-lucide="tag" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-body">
+          <div class="detail-row-label">タイトル</div>
+          <div class="detail-row-value ${s.title ? '' : 'empty'}">${escapeHtml(s.title) || '未設定'}</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row-icon"><i data-lucide="file-text" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-body">
+          <div class="detail-row-label">メモ</div>
+          <div class="detail-row-value ${s.note ? '' : 'empty'}" style="white-space:pre-wrap">${escapeHtml(s.note) || '未設定'}</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row-icon"><i data-lucide="layers" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-body">
+          <div class="detail-row-label">登録方法</div>
+          <div class="detail-row-value"><span class="badge badge--${s.source}">${s.source}</span></div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row-icon"><i data-lucide="clock" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-body">
+          <div class="detail-row-label">登録日</div>
+          <div class="detail-row-value">${formatDatetime(s.created_at)}</div>
+        </div>
+      </div>
+    `;
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function switchToEditMode(s) {
+      const sighting = allSightings.find(x => x.id === editingId);
+      if (!sighting) return;
+
+      document.getElementById('detail-modal-title').textContent = '編集';
+      document.getElementById('detail-view').classList.add('hidden');
+      document.getElementById('detail-form').classList.remove('hidden');
+      document.getElementById('detail-edit-btn').classList.add('hidden');
+      document.getElementById('detail-delete-btn').classList.add('hidden');
+
+      document.getElementById('edit-title').value = sighting.title || '';
+      document.getElementById('edit-note').value = sighting.note || '';
+      document.getElementById('edit-datetime').value = toDatetimeLocal(sighting.datetime);
+      document.getElementById('edit-location').value = sighting.location_label || '';
+    }
+
+    function hideDetailModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+      editingId = null;
+    }
+
+    /* =============================================
+       Toast
+       ============================================= */
+    function showToast(message, type = 'success', duration = 2500) {
+      const container = document.getElementById('toast');
+      const item = document.createElement('div');
+      item.className = `toast-item ${type} entering`;
+      item.textContent = message;
+      container.appendChild(item);
+
+      setTimeout(() => {
+        item.classList.remove('entering');
+        item.classList.add('leaving');
+        item.addEventListener('animationend', () => item.remove(), { once: true });
+      }, duration);
+    }
+
+    /* =============================================
+       Lucide Icons 再描画
+       ============================================= */
+    function refreshIcons() {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    /* =============================================
+       Init & Event Listeners
+       ============================================= */
     async function init() {
-      // スケルトン表示
-      showSkeleton();
+      lucide.createIcons();
 
-      try {
-        allSightings = await getAllSightings();
-        hideSkeleton();
-        renderSightingsList(allSightings);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      } catch (err) {
-        hideSkeleton();
-        console.error('init failed:', err);
-        showToast('データの読み込みに失敗しました', 'error');
+      // 認証状態の監視
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          showMainApp(session.user);
+        } else {
+          showLoginScreen();
+        }
+      });
+
+      // 初期セッション確認
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        showMainApp(session.user);
+      } else {
+        showLoginScreen();
       }
 
-      /* ── FAB ── */
+      // ─── Login ───
+      document.getElementById('google-signin-btn').addEventListener('click', signInWithGoogle);
+
+      // ─── Account Menu ───
+      document.getElementById('account-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('account-menu').classList.toggle('hidden');
+      });
+      document.getElementById('signout-btn').addEventListener('click', () => {
+        document.getElementById('account-menu').classList.add('hidden');
+        signOut();
+      });
+      document.addEventListener('click', () => {
+        document.getElementById('account-menu').classList.add('hidden');
+      });
+
+      // ─── Search ───
+      document.getElementById('search-btn').addEventListener('click', () => {
+        const bar = document.getElementById('search-bar');
+        bar.classList.toggle('hidden');
+        if (!bar.classList.contains('hidden')) {
+          document.getElementById('search-input').focus();
+        } else {
+          document.getElementById('search-input').value = '';
+          renderSightingsList(allSightings);
+        }
+      });
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        renderSightingsList(allSightings, e.target.value.trim());
+        refreshIcons();
+      });
+
+      // ─── FAB ───
       document.getElementById('fab').addEventListener('click', () => {
         if (navigator.vibrate) navigator.vibrate(10);
-        openAddModal();
+        showAddModal();
+        refreshIcons();
       });
 
-      /* ── 検索ボタン ── */
-      document.getElementById('search-btn').addEventListener('click', () => {
-        const bar   = document.getElementById('search-bar');
-        const input = document.getElementById('search-input');
-        if (bar.classList.contains('hidden')) {
-          bar.classList.remove('hidden');
-          input.focus();
-        } else {
-          bar.classList.add('hidden');
-          input.value = '';
-          renderSightingsList(allSightings, '');
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-      });
-
-      /* ── 検索クリアボタン ── */
-      document.getElementById('search-clear-btn').addEventListener('click', () => {
-        const input = document.getElementById('search-input');
-        input.value = '';
-        input.focus();
-        renderSightingsList(allSightings, '');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      });
-
-      /* ── 検索入力 ── */
-      document.getElementById('search-input').addEventListener('input', (e) => {
-        renderSightingsList(allSightings, e.target.value);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      });
-
-      /* ── 新規登録モーダル：キャンセルボタン ── */
+      // ─── Add Modal ───
+      document.getElementById('add-close-btn').addEventListener('click', hideAddModal);
       document.getElementById('add-cancel-btn').addEventListener('click', hideAddModal);
-      document.getElementById('add-modal-close').addEventListener('click', hideAddModal);
+      document.getElementById('add-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) hideAddModal();
+      });
 
-      /* ── 新規登録モーダル：オーバーレイクリックで閉じる ── */
-      document.getElementById('add-modal-overlay').addEventListener('click', hideAddModal);
-
-      /* ── 新規登録モーダル：日時フィールドクリック ── */
+      // Datetime toggle
       document.getElementById('add-datetime-display').addEventListener('click', () => {
-        const display = document.getElementById('add-datetime-display');
-        const input   = document.getElementById('add-datetime-input');
-        display.classList.add('hidden');
-        input.classList.remove('hidden');
-        input.focus();
+        document.getElementById('add-datetime-display').classList.add('hidden');
+        document.getElementById('add-datetime-input').classList.remove('hidden');
+        document.getElementById('add-datetime-input').focus();
       });
-
       document.getElementById('add-datetime-input').addEventListener('change', (e) => {
-        const iso     = fromDatetimeLocal(e.target.value);
-        const display = document.getElementById('add-datetime-display');
-        const input   = document.getElementById('add-datetime-input');
-        const valueEl = display.querySelector('.form-display-value');
-        valueEl.textContent = formatDatetime(iso);
-        valueEl.classList.remove('placeholder');
-        input.classList.add('hidden');
-        display.classList.remove('hidden');
-      });
-
-      document.getElementById('add-datetime-input').addEventListener('blur', (e) => {
-        if (!e.target.value) return;
-        const iso     = fromDatetimeLocal(e.target.value);
-        const display = document.getElementById('add-datetime-display');
-        const input   = document.getElementById('add-datetime-input');
-        const valueEl = display.querySelector('.form-display-value');
-        valueEl.textContent = formatDatetime(iso);
-        valueEl.classList.remove('placeholder');
-        input.classList.add('hidden');
-        display.classList.remove('hidden');
-      });
-
-      /* ── 新規登録モーダル：場所フィールドクリック ── */
-      document.getElementById('add-location-display').addEventListener('click', () => {
-        const display = document.getElementById('add-location-display');
-        const input   = document.getElementById('add-location-input');
-        // 現在の表示テキストをinputに反映
-        const currentLabel = display.querySelector('.form-display-value').textContent.trim();
-        if (!input.value && currentLabel && !currentLabel.includes('取得中')) {
-          input.value = currentLabel;
+        if (e.target.value) {
+          setAddDatetime(new Date(e.target.value).toISOString());
         }
-        display.classList.add('hidden');
+      });
+      document.getElementById('add-datetime-input').addEventListener('blur', (e) => {
+        if (e.target.value) {
+          setAddDatetime(new Date(e.target.value).toISOString());
+        } else {
+          document.getElementById('add-datetime-display').classList.remove('hidden');
+          document.getElementById('add-datetime-input').classList.add('hidden');
+        }
+      });
+
+      // Location toggle
+      document.getElementById('add-location-display').addEventListener('click', () => {
+        document.getElementById('add-location-display').classList.add('hidden');
+        const input = document.getElementById('add-location-input');
         input.classList.remove('hidden');
         input.focus();
       });
-
       document.getElementById('add-location-input').addEventListener('blur', (e) => {
-        const display = document.getElementById('add-location-display');
-        const input   = document.getElementById('add-location-input');
-        const valueEl = display.querySelector('.form-display-value');
-        const val     = e.target.value.trim();
-        if (val) {
-          valueEl.textContent = val;
-          valueEl.classList.remove('placeholder');
-          // 手動入力の場合はlat/lngをクリア
-          document.getElementById('add-location-lat').value = '';
-          document.getElementById('add-location-lng').value = '';
-        } else {
-          valueEl.textContent = '場所を入力してください';
-          valueEl.classList.add('placeholder');
-        }
-        input.classList.add('hidden');
-        display.classList.remove('hidden');
+        const val = e.target.value.trim();
+        setAddLocation({
+          lat: parseFloat(document.getElementById('add-location-lat').value) || null,
+          lng: parseFloat(document.getElementById('add-location-lng').value) || null,
+          label: val
+        });
       });
 
-      /* ── 写真ボタン ── */
+      // Photo
       document.getElementById('add-photo-btn').addEventListener('click', () => {
         document.getElementById('add-photo-file').click();
       });
-
       document.getElementById('add-photo-file').addEventListener('change', async (e) => {
-        const file      = e.target.files[0];
-        const statusEl  = document.getElementById('add-photo-status');
+        const file = e.target.files[0];
+        const statusEl = document.getElementById('add-photo-status');
         if (!file) return;
 
-        statusEl.textContent = 'EXIFを解析中...';
+        statusEl.textContent = 'EXIFを解析中…';
         statusEl.classList.remove('error');
 
         const { datetime, location } = await extractPhotoMetadata(file);
@@ -2297,7 +1883,6 @@
         } else {
           showToast('⚠️ 日時情報が見つかりません。手動で入力してください', 'error');
         }
-
         if (location) {
           setAddLocation(location);
           showToast('📍 写真の位置情報を取得しました', 'success');
@@ -2305,144 +1890,111 @@
           showToast('⚠️ 位置情報が見つかりません。手動で入力してください', 'error');
         }
 
-        if (!datetime && !location) {
-          statusEl.textContent = 'この写真には位置情報・日時情報がありません。手動で入力してください';
-          statusEl.classList.add('error');
-        } else {
-          statusEl.textContent = '写真から情報を取得しました';
-          statusEl.classList.remove('error');
-        }
+        statusEl.textContent = (datetime || location) ? '写真から情報を取得しました' : 'この写真には情報がありません。手動で入力してください';
+        if (!datetime && !location) statusEl.classList.add('error');
 
-        // source を photo にマーク（グローバルフラグ）
         document.getElementById('add-photo-file').dataset.source = 'photo';
-
-        // 写真ファイル自体は破棄
         e.target.value = '';
       });
 
-      /* ── 新規登録フォーム送信 ── */
+      // Add Form Submit
       document.getElementById('add-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        const data       = buildAddFormData();
-        const photoInput = document.getElementById('add-photo-file');
-        if (photoInput.dataset.source === 'photo') {
-          data.source = 'photo';
-          delete photoInput.dataset.source;
-        }
+        const btn = document.getElementById('add-save-btn');
+        btn.disabled = true;
+        btn.textContent = '保存中…';
 
         try {
+          const data = buildAddFormData();
           await createSighting(data);
           hideAddModal();
-          await reloadSightings();
-          showToast('記録しました！', 'success');
+          showToast('✅ 記録しました！', 'success');
+          await loadSightings();
+          refreshIcons();
         } catch (err) {
-          console.error('createSighting error:', err);
+          console.error('保存エラー:', err);
           showToast('データの保存に失敗しました', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '保存する';
         }
       });
 
-      /* ── カードクリック → 詳細モーダル ── */
-      document.getElementById('sightings-list').addEventListener('click', (e) => {
-        const card = e.target.closest('.sighting-card');
-        if (!card) return;
-        const id      = card.dataset.id;
-        const sighting = allSightings.find(s => s.id === id);
-        if (sighting) showDetailModal(sighting);
+      // ─── Detail Modal ───
+      document.getElementById('detail-close-btn').addEventListener('click', hideDetailModal);
+      document.getElementById('detail-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) hideDetailModal();
       });
-
-      /* ── 詳細モーダル：閉じる ── */
-      document.getElementById('detail-modal-close').addEventListener('click', hideDetailModal);
-      document.getElementById('detail-modal-overlay').addEventListener('click', hideDetailModal);
-
-      /* ── 詳細モーダル：編集ボタン ── */
       document.getElementById('detail-edit-btn').addEventListener('click', () => {
-        const modal     = document.getElementById('detail-modal');
-        const id        = modal.dataset.sightingId;
-        const sighting  = allSightings.find(s => s.id === id);
-        if (sighting) switchToEditMode(sighting);
+        switchToEditMode();
+      });
+      document.getElementById('detail-delete-btn').addEventListener('click', () => {
+        pendingDeleteId = editingId;
+        document.getElementById('confirm-overlay').classList.remove('hidden');
       });
 
-      /* ── 編集フォーム送信 ── */
-      document.getElementById('edit-form').addEventListener('submit', async (e) => {
+      // Edit form
+      document.getElementById('edit-cancel-btn').addEventListener('click', () => {
+        const s = allSightings.find(x => x.id === editingId);
+        if (s) openDetailModal(s);
+      });
+      document.getElementById('detail-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        const id       = document.getElementById('edit-id').value;
-        const title    = document.getElementById('edit-title').value.trim();
-        const note     = document.getElementById('edit-note').value.trim();
-        const dtVal    = document.getElementById('edit-datetime').value;
-        const locLabel = document.getElementById('edit-location').value.trim();
-        const lat      = document.getElementById('edit-location-lat').value;
-        const lng      = document.getElementById('edit-location-lng').value;
-
-        const data = {
-          title,
-          note,
-          datetime: fromDatetimeLocal(dtVal) || new Date().toISOString(),
-          location: {
-            lat:   lat   ? parseFloat(lat)   : null,
-            lng:   lng   ? parseFloat(lng)   : null,
-            label: locLabel,
-          },
-        };
+        const btn = document.getElementById('edit-save-btn');
+        btn.disabled = true;
+        btn.textContent = '更新中…';
 
         try {
-          await updateSighting(id, data);
+          const updates = {
+            title: document.getElementById('edit-title').value.trim() || null,
+            note: document.getElementById('edit-note').value.trim() || null,
+            datetime: new Date(document.getElementById('edit-datetime').value).toISOString(),
+            location_label: document.getElementById('edit-location').value.trim() || null,
+          };
+          await updateSighting(editingId, updates);
           hideDetailModal();
-          await reloadSightings();
-          showToast('更新しました！', 'success');
+          showToast('✅ 更新しました！', 'success');
+          await loadSightings();
+          refreshIcons();
         } catch (err) {
-          console.error('updateSighting error:', err);
-          showToast('データの保存に失敗しました', 'error');
+          console.error('更新エラー:', err);
+          showToast('更新に失敗しました', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '更新する';
         }
       });
 
-      /* ── 削除ボタン ── */
-      document.getElementById('detail-delete-btn').addEventListener('click', () => {
-        const modal = document.getElementById('detail-modal');
-        _pendingDeleteId = modal.dataset.sightingId;
-        document.getElementById('confirm-dialog').classList.remove('hidden');
-      });
-
-      /* ── 削除確認：はい ── */
+      // ─── Confirm Dialog ───
       document.getElementById('confirm-yes').addEventListener('click', async () => {
-        if (!_pendingDeleteId) return;
-        const id = _pendingDeleteId;
-        _pendingDeleteId = null;
-
-        document.getElementById('confirm-dialog').classList.add('hidden');
-
+        document.getElementById('confirm-overlay').classList.add('hidden');
+        if (!pendingDeleteId) return;
         try {
-          await deleteSighting(id);
+          await deleteSighting(pendingDeleteId);
+          pendingDeleteId = null;
           hideDetailModal();
-          await reloadSightings();
-          showToast('削除しました', 'success');
+          showToast('🗑️ 削除しました', 'success');
+          await loadSightings();
+          refreshIcons();
         } catch (err) {
-          console.error('deleteSighting error:', err);
+          console.error('削除エラー:', err);
           showToast('削除に失敗しました', 'error');
         }
       });
-
-      /* ── 削除確認：キャンセル ── */
       document.getElementById('confirm-no').addEventListener('click', () => {
-        _pendingDeleteId = null;
-        document.getElementById('confirm-dialog').classList.add('hidden');
+        document.getElementById('confirm-overlay').classList.add('hidden');
+        pendingDeleteId = null;
       });
-
-      document.getElementById('confirm-overlay').addEventListener('click', () => {
-        _pendingDeleteId = null;
-        document.getElementById('confirm-dialog').classList.add('hidden');
+      document.getElementById('confirm-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+          document.getElementById('confirm-overlay').classList.add('hidden');
+          pendingDeleteId = null;
+        }
       });
     }
 
-    // Lucide アイコンの初期化 + アプリ起動
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-      init();
-    });
+    document.addEventListener('DOMContentLoaded', init);
   </script>
-
 </body>
+
 </html>
