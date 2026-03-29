@@ -1399,21 +1399,19 @@
 
         let datetime = null;
         if (result.DateTimeOriginal) {
-          let d;
+          const pad = n => String(n).padStart(2, '0');
           if (result.DateTimeOriginal instanceof Date) {
-            // exifrがDateオブジェクトで返す場合、UTCにずれているので補正
-            const d_temp = result.DateTimeOriginal;
-            const offsetMs = d_temp.getTimezoneOffset() * 60 * 1000;
-            d = new Date(d_temp.getTime() - offsetMs);
+            // exifr は EXIF のローカル時刻をそのまま UTC として Date に格納する
+            // → getUTC*() で取り出すと元のローカル時刻の数値が得られる
+            const t = result.DateTimeOriginal;
+            datetime = `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
           } else {
-            // 文字列 "2025:03:29 17:11:00" の場合はローカル時刻として扱う
+            // 文字列 "2025:03:29 17:11:00" → ローカル時刻として解釈
             const str = result.DateTimeOriginal.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
-            d = new Date(str);
-          }
-          if (!isNaN(d.getTime())) {
-            // ローカル時刻のままISO形式で組み立て（UTC変換しない）
-            const pad = n => String(n).padStart(2, '0');
-            datetime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) {
+              datetime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            }
           }
         }
 
