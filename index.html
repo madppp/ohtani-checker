@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>大谷チェッカー</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,13 +14,13 @@
 
   <style>
     :root {
-      --color-accent: #E63312;
-      --color-accent-dark: #C42A0E;
-      --color-bg: #F5F5F5;
+      --color-accent: #005A9C;
+      --color-accent-dark: #003F7A;
+      --color-bg: #F8FAFC;
       --color-card: #FFFFFF;
-      --color-text: #1A1A1A;
-      --color-text-sub: #888888;
-      --color-border: #E8E8E8;
+      --color-text: #1A1A2E;
+      --color-text-sub: #64748B;
+      --color-border: #E2E8F0;
       --color-shadow: rgba(0, 0, 0, 0.08);
       --color-overlay: rgba(0, 0, 0, 0.5);
       --color-success: #22C55E;
@@ -132,7 +132,7 @@
 
     #google-signin-btn:hover {
       border-color: var(--color-accent);
-      box-shadow: 0 4px 16px rgba(230, 51, 18, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 90, 156, 0.2);
       transform: translateY(-1px);
     }
 
@@ -172,7 +172,7 @@
       display: flex;
       align-items: center;
       gap: var(--space-sm);
-      box-shadow: 0 2px 8px rgba(230, 51, 18, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 90, 156, 0.3);
     }
 
     .header-title {
@@ -246,7 +246,7 @@
     }
 
     .account-menu-item:hover {
-      background: #FFF5F5;
+      background: #EBF4FF;
     }
 
     /* ─── Search Bar ─── */
@@ -342,7 +342,7 @@
     .empty-icon {
       width: 72px;
       height: 72px;
-      background: #FFF0EE;
+      background: #EBF4FF;
       border-radius: var(--radius-full);
       display: flex;
       align-items: center;
@@ -454,8 +454,18 @@
       font-size: 14px;
       font-weight: 500;
       color: var(--color-text);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       line-height: 1.4;
+    }
+
+    .sighting-note {
+      font-size: 13px;
+      color: var(--color-text-sub);
+      margin-bottom: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
     }
 
     .badge {
@@ -468,7 +478,7 @@
     }
 
     .badge--text {
-      background: #FFF0EE;
+      background: #EBF4FF;
       color: var(--color-accent);
     }
 
@@ -489,7 +499,7 @@
       color: #fff;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(230, 51, 18, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 90, 156, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -503,7 +513,7 @@
 
     #fab:hover {
       transform: scale(1.08);
-      box-shadow: 0 6px 24px rgba(230, 51, 18, 0.5);
+      box-shadow: 0 6px 24px rgba(0, 90, 156, 0.5);
     }
 
     #fab:active {
@@ -635,7 +645,7 @@
     .form-input:focus,
     .form-textarea:focus {
       border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px rgba(230, 51, 18, 0.1);
+      box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.15);
     }
 
     .form-textarea {
@@ -876,13 +886,13 @@
     }
 
     .btn-sm-danger {
-      background: #FFF0EE;
+      background: #FEF2F2;
       color: var(--color-error);
       border: none;
     }
 
     .btn-sm-danger:hover {
-      background: #FFE0DC;
+      background: #FEE2E2;
     }
 
     /* ─── Confirm Dialog ─── */
@@ -1019,6 +1029,11 @@
       flex: 1;
       height: 1px;
       background: var(--color-border);
+    }
+
+    /* iOS自動ズーム防止 */
+    input, textarea, select {
+      font-size: 16px !important;
     }
 
     .hidden {
@@ -1379,14 +1394,27 @@
           gps: true,
           pick: ['DateTimeOriginal', 'GPSLatitude', 'GPSLongitude']
         });
+
         if (!result) return { datetime: null, location: null };
 
         let datetime = null;
         if (result.DateTimeOriginal) {
-          const d = result.DateTimeOriginal instanceof Date
-            ? result.DateTimeOriginal
-            : new Date(result.DateTimeOriginal.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3'));
-          if (!isNaN(d.getTime())) datetime = d.toISOString();
+          let d;
+          if (result.DateTimeOriginal instanceof Date) {
+            // exifrがDateオブジェクトで返す場合、UTCにずれているので補正
+            const d_temp = result.DateTimeOriginal;
+            const offsetMs = d_temp.getTimezoneOffset() * 60 * 1000;
+            d = new Date(d_temp.getTime() - offsetMs);
+          } else {
+            // 文字列 "2025:03:29 17:11:00" の場合はローカル時刻として扱う
+            const str = result.DateTimeOriginal.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
+            d = new Date(str);
+          }
+          if (!isNaN(d.getTime())) {
+            // ローカル時刻のままISO形式で組み立て（UTC変換しない）
+            const pad = n => String(n).padStart(2, '0');
+            datetime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+          }
         }
 
         let location = null;
@@ -1523,11 +1551,15 @@
       const titleHtml = s.title
         ? `<div class="card-title">${escapeHtml(s.title)}</div>`
         : '';
+      const noteHtml = s.note
+        ? `<div class="sighting-note">${escapeHtml(s.note)}</div>`
+        : '';
 
       card.innerHTML = `
       <div class="card-datetime">${formatCardDatetime(s.datetime)}</div>
       ${locationHtml}
       ${titleHtml}
+      ${noteHtml}
       <span class="badge badge--${s.source}">${s.source}</span>
     `;
       card.addEventListener('click', () => openDetailModal(s));
