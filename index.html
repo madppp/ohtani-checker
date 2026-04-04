@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
   <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 
   <style>
@@ -48,6 +48,21 @@
       --safe-right: env(safe-area-inset-right, 0px);
 
       --header-height: 56px;
+
+      /* MD3 Tokens */
+      --md-primary: #005A9C;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D4E3FF;
+      --md-surface: #FFFBFE;
+      --md-surface-container: #F0F4F8;
+      --md-on-surface: #1A1A2E;
+      --md-on-surface-variant: #42474E;
+      --md-outline: #72777F;
+      --md-outline-variant: #C2C7CF;
+      --md-error: #BA1A1A;
+      --md-elevation-1: 0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15);
+      --md-elevation-2: 0px 1px 2px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
+      --md-elevation-3: 0px 1px 3px rgba(0,0,0,0.3), 0px 4px 8px 3px rgba(0,0,0,0.15);
     }
 
     *,
@@ -65,6 +80,26 @@
       background: var(--color-bg);
       color: var(--color-text);
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Material Symbols ─── */
+    .ms {
+      font-family: 'Material Symbols Rounded';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      user-select: none;
+      flex-shrink: 0;
     }
 
     /* ─── Layout ─── */
@@ -494,16 +529,16 @@
       right: max(var(--space-lg), calc((100vw - 480px) / 2 + var(--space-lg)));
       width: 56px;
       height: 56px;
-      border-radius: var(--radius-full);
+      border-radius: 16px;
       background: var(--color-accent);
       color: #fff;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0, 90, 156, 0.4);
+      box-shadow: var(--md-elevation-3);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
       z-index: 90;
     }
 
@@ -512,12 +547,17 @@
     }
 
     #fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 6px 24px rgba(0, 90, 156, 0.5);
+      transform: scale(1.04);
+      background: var(--color-accent-dark);
     }
 
     #fab:active {
       transform: scale(0.95);
+    }
+
+    #fab .ms {
+      font-size: 24px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
     /* ─── Modal Base ─── */
@@ -539,11 +579,12 @@
       width: 100%;
       max-width: 480px;
       max-height: 92vh;
-      background: var(--color-card);
-      border-radius: var(--radius-modal);
+      background: #FFFBFE;
+      border-radius: 28px 28px 0 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: var(--md-elevation-2);
     }
 
     @keyframes slideUpModal {
@@ -561,48 +602,56 @@
     }
 
     .modal-handle {
-      width: 36px;
+      width: 32px;
       height: 4px;
-      background: var(--color-border);
+      background: var(--md-outline-variant);
       border-radius: 2px;
-      margin: 10px auto 0;
+      margin: 16px auto 0;
       flex-shrink: 0;
     }
 
     .modal-header {
       display: flex;
       align-items: center;
-      padding: var(--space-md) var(--space-md) var(--space-sm);
+      padding: 16px 24px 12px;
       flex-shrink: 0;
+      gap: 8px;
     }
 
     .modal-title {
       flex: 1;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--color-text);
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: var(--md-on-surface);
+      line-height: 1.3;
     }
 
     .modal-close-btn {
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: none;
-      background: var(--color-bg);
-      border-radius: var(--radius-full);
+      background: transparent;
+      border-radius: 50%;
       cursor: pointer;
-      color: var(--color-text-sub);
-      transition: background 0.15s;
+      color: var(--md-on-surface-variant);
+      transition: background 0.2s;
+      flex-shrink: 0;
     }
 
     .modal-close-btn:hover {
-      background: var(--color-border);
+      background: rgba(0,0,0,0.08);
+    }
+
+    .modal-close-btn:active {
+      background: rgba(0,0,0,0.12);
     }
 
     .modal-body {
-      padding: 0 var(--space-md) calc(var(--space-md) + var(--safe-bottom));
+      padding: 4px 24px calc(24px + var(--safe-bottom));
       overflow-y: auto;
       flex: 1;
       scrollbar-width: none;
@@ -612,7 +661,7 @@
       display: none;
     }
 
-    /* ─── Form ─── */
+    /* ─── Form (legacy, used in edit form) ─── */
     .form-group {
       margin-bottom: var(--space-md);
     }
@@ -654,382 +703,300 @@
       line-height: 1.5;
     }
 
-    /* Display/Input toggle field */
-    .form-display {
+    /* ─── MD3 Outlined Text Field ─── */
+    .md3-field {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .md3-input,
+    .md3-textarea {
+      width: 100%;
+      border: 1px solid var(--md-outline);
+      border-radius: 4px;
+      font-family: var(--font-main);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--md-on-surface);
+      background: transparent;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      display: block;
+      box-sizing: border-box;
+    }
+
+    .md3-input {
+      height: 56px;
+      padding: 20px 16px 8px;
+    }
+
+    .md3-textarea {
+      padding: 28px 16px 10px;
+      min-height: 120px;
+      resize: none;
+    }
+
+    .md3-input:hover, .md3-textarea:hover { border-color: var(--md-on-surface); }
+
+    .md3-input:focus, .md3-textarea:focus {
+      border-width: 2px;
+      border-color: var(--color-accent);
+      padding-left: 15px;
+    }
+
+    .md3-textarea:focus { padding-left: 15px; }
+
+    .md3-label {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-main);
+      font-size: 16px;
+      line-height: 1;
+      color: var(--md-on-surface-variant);
+      background: #FFFBFE;
+      padding: 0 4px;
+      pointer-events: none;
+      transition: top 0.15s cubic-bezier(0.4,0,0.2,1),
+                  font-size 0.15s cubic-bezier(0.4,0,0.2,1),
+                  color 0.15s;
+      white-space: nowrap;
+    }
+
+    .md3-textarea-label { top: 20px; transform: none; }
+
+    .md3-input:focus + .md3-label,
+    .md3-input:not(:placeholder-shown) + .md3-label {
+      top: 0; transform: translateY(-50%); font-size: 12px;
+    }
+
+    .md3-textarea:focus + .md3-label,
+    .md3-textarea:not(:placeholder-shown) + .md3-label {
+      top: 0; transform: translateY(-50%); font-size: 12px;
+    }
+
+    .md3-input:focus + .md3-label,
+    .md3-textarea:focus + .md3-label { color: var(--color-accent); }
+
+    /* ─── MD3 Display Field ─── */
+    .md3-display-field {
       display: flex;
       align-items: center;
-      gap: var(--space-sm);
-      padding: 12px var(--space-md);
-      background: var(--color-bg);
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-input);
+      gap: 12px;
+      padding: 0 16px;
+      height: 56px;
+      border: 1px solid var(--md-outline);
+      border-radius: 4px;
       cursor: pointer;
-      transition: border-color 0.2s;
+      transition: border-color 0.15s;
+      background: transparent;
     }
 
-    .form-display:hover {
-      border-color: var(--color-accent);
-    }
+    .md3-display-field:hover { border-color: var(--md-on-surface); }
+    .md3-display-field:active { border-color: var(--color-accent); border-width: 2px; }
 
-    .form-display-icon {
-      font-size: 16px;
-      flex-shrink: 0;
-    }
+    .md3-display-leading { color: var(--md-on-surface-variant); font-size: 20px; flex-shrink: 0; }
+    .md3-display-content { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+    .md3-display-sublabel { font-size: 12px; line-height: 1; color: var(--md-on-surface-variant); margin-bottom: 2px; }
+    .md3-display-value { font-size: 16px; line-height: 1.3; color: var(--md-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .md3-display-value.placeholder { color: var(--md-on-surface-variant); }
+    .md3-display-trailing { color: var(--md-on-surface-variant); font-size: 20px; flex-shrink: 0; }
 
-    .form-display-value {
-      flex: 1;
-      font-size: 14px;
-      color: var(--color-text);
-    }
-
-    .form-display-value.placeholder {
-      color: var(--color-text-sub);
-    }
-
-    .form-display-edit {
-      color: var(--color-text-sub);
-      flex-shrink: 0;
-    }
-
+    /* ─── Form Location Loading ─── */
     .form-location-loading {
       display: flex;
       align-items: center;
-      gap: var(--space-sm);
-      padding: 12px var(--space-md);
-      background: var(--color-bg);
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-input);
+      gap: 12px;
+      padding: 0 16px;
+      height: 56px;
+      border: 1px solid var(--md-outline-variant);
+      border-radius: 4px;
+      background: transparent;
     }
 
-    .form-location-loading.hidden {
-      display: none;
-    }
+    .form-location-loading.hidden { display: none; }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--color-border);
+      width: 18px; height: 18px;
+      border: 2px solid var(--md-outline-variant);
       border-top-color: var(--color-accent);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       flex-shrink: 0;
     }
 
-    .loading-text {
-      font-size: 13px;
-      color: var(--color-text-sub);
-    }
+    .loading-text { font-size: 14px; color: var(--md-on-surface-variant); }
 
-    /* Photo button */
+    /* ─── Photo button - MD3 Outlined Button ─── */
     .photo-btn {
-      width: 100%;
-      padding: 14px;
-      border: 1.5px dashed var(--color-border);
-      border-radius: var(--radius-input);
-      background: var(--color-bg);
-      font-family: var(--font-main);
-      font-size: 14px;
-      color: var(--color-text-sub);
-      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: var(--space-sm);
-      transition: border-color 0.2s, color 0.2s;
+      gap: 8px;
+      width: 100%;
+      height: 40px;
+      padding: 0 24px;
+      border: 1px solid var(--md-outline);
+      border-radius: 20px;
+      background: transparent;
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      color: var(--color-accent);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
     }
 
-    .photo-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-    }
+    .photo-btn:hover { background: rgba(0,90,156,0.08); border-color: var(--color-accent); }
+    .photo-btn:active { background: rgba(0,90,156,0.12); }
 
     .photo-status {
-      margin-top: var(--space-xs);
+      margin-top: 6px;
       font-size: 12px;
-      color: var(--color-text-sub);
-      min-height: 18px;
+      color: var(--md-on-surface-variant);
+      min-height: 16px;
+      padding-left: 4px;
     }
 
-    .photo-status.error {
-      color: var(--color-error);
+    .photo-status.error { color: var(--md-error); }
+
+    /* ─── MD3 Divider ─── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 8px 0 16px;
+      color: var(--md-on-surface-variant);
+      font-size: 12px; letter-spacing: 0.4px;
     }
 
-    /* Form actions */
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--md-outline-variant);
+    }
+
+    /* ─── Form actions ─── */
     .form-actions {
-      display: flex;
-      gap: var(--space-sm);
-      padding-top: var(--space-md);
+      display: flex; gap: 8px;
+      justify-content: flex-end;
+      padding-top: 8px; padding-bottom: 8px;
     }
 
     .btn {
-      flex: 1;
-      padding: 14px;
-      border-radius: var(--radius-btn);
+      height: 40px;
+      padding: 0 24px;
+      border-radius: 20px;
       font-family: var(--font-main);
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
       cursor: pointer;
       border: none;
-      transition: opacity 0.2s, transform 0.15s;
+      transition: background 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
     }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
+    .btn:active { transform: scale(0.97); }
 
-    .btn-ghost {
-      background: var(--color-bg);
-      color: var(--color-text-sub);
-    }
-
-    .btn-ghost:hover {
-      background: var(--color-border);
-    }
+    .btn-ghost { background: transparent; color: var(--color-accent); }
+    .btn-ghost:hover { background: rgba(0,90,156,0.08); }
 
     .btn-primary {
-      background: var(--color-accent);
-      color: #fff;
+      background: var(--color-accent); color: #fff;
+      box-shadow: var(--md-elevation-1);
     }
 
-    .btn-primary:hover {
-      background: var(--color-accent-dark);
-    }
+    .btn-primary:hover { background: var(--color-accent-dark); box-shadow: var(--md-elevation-2); }
+    .btn-primary:disabled { opacity: 0.38; pointer-events: none; box-shadow: none; }
 
-    .btn-primary:disabled {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    .btn-danger {
-      background: var(--color-error);
-      color: #fff;
-    }
-
-    .btn-danger:hover {
-      background: #DC2626;
-    }
+    .btn-danger { background: #B3261E; color: #fff; }
+    .btn-danger:hover { background: #8C1D18; }
 
     /* ─── Detail Modal ─── */
     .detail-row {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--space-sm);
-      padding: var(--space-sm) 0;
-      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--md-outline-variant);
     }
 
-    .detail-row:last-of-type {
-      border-bottom: none;
-    }
+    .detail-row:last-of-type { border-bottom: none; }
+    .detail-row-icon { color: var(--md-on-surface-variant); margin-top: 2px; flex-shrink: 0; font-size: 20px; }
+    .detail-row-body { flex: 1; }
+    .detail-row-label { font-size: 12px; color: var(--md-on-surface-variant); font-weight: 500; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .detail-row-value { font-size: 16px; color: var(--md-on-surface); line-height: 1.5; }
+    .detail-row-value.empty { color: var(--md-on-surface-variant); font-style: italic; }
 
-    .detail-row-icon {
-      color: var(--color-text-sub);
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
-    .detail-row-body {
-      flex: 1;
-    }
-
-    .detail-row-label {
-      font-size: 11px;
-      color: var(--color-text-sub);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .detail-row-value {
-      font-size: 15px;
-      color: var(--color-text);
-      margin-top: 2px;
-      line-height: 1.5;
-    }
-
-    .detail-row-value.empty {
-      color: var(--color-text-sub);
-      font-style: italic;
-    }
-
-    .detail-header-actions {
-      display: flex;
-      gap: var(--space-sm);
-    }
+    .detail-header-actions { display: flex; gap: 8px; align-items: center; }
 
     .btn-sm {
-      padding: 7px 14px;
-      border-radius: var(--radius-btn);
-      font-family: var(--font-main);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: opacity 0.2s;
+      height: 36px; padding: 0 16px; border-radius: 18px;
+      font-family: var(--font-main); font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none; letter-spacing: 0.1px;
     }
 
-    .btn-sm-outline {
-      background: none;
-      border: 1.5px solid var(--color-border);
-      color: var(--color-text);
-    }
+    .btn-sm-outline { background: transparent; border: 1px solid var(--md-outline); color: var(--color-accent); }
+    .btn-sm-outline:hover { background: rgba(0,90,156,0.08); border-color: var(--color-accent); }
+    .btn-sm-danger { background: #FFDAD6; color: #410002; border: none; }
+    .btn-sm-danger:hover { background: #FFB4AB; }
 
-    .btn-sm-outline:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-    }
-
-    .btn-sm-danger {
-      background: #FEF2F2;
-      color: var(--color-error);
-      border: none;
-    }
-
-    .btn-sm-danger:hover {
-      background: #FEE2E2;
-    }
-
-    /* ─── Confirm Dialog ─── */
+    /* ─── Confirm Dialog - MD3 ─── */
     #confirm-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--color-overlay);
-      z-index: 400;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-md);
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 400; display: flex;
+      align-items: center; justify-content: center;
+      padding: 24px;
     }
 
-    #confirm-overlay.hidden {
-      display: none;
-    }
+    #confirm-overlay.hidden { display: none; }
 
     @keyframes popIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .confirm-dialog {
-      width: 100%;
-      max-width: 320px;
-      background: var(--color-card);
-      border-radius: 16px;
-      padding: var(--space-lg);
-      animation: popIn 0.2s ease forwards;
+      width: 100%; max-width: 312px;
+      background: #FFFBFE;
+      border-radius: 28px;
+      padding: 24px;
+      animation: popIn 0.2s cubic-bezier(0.05,0.7,0.1,1) forwards;
+      box-shadow: var(--md-elevation-3);
     }
 
-    .confirm-title {
-      font-size: 17px;
-      font-weight: 700;
-      margin-bottom: var(--space-sm);
-    }
+    .confirm-title { font-size: 22px; font-weight: 500; margin-bottom: 16px; color: var(--md-on-surface); line-height: 1.3; }
+    .confirm-body { font-size: 14px; color: var(--md-on-surface-variant); margin-bottom: 24px; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
-    .confirm-body {
-      font-size: 14px;
-      color: var(--color-text-sub);
-      margin-bottom: var(--space-lg);
-      line-height: 1.5;
-    }
-
-    .confirm-actions {
-      display: flex;
-      gap: var(--space-sm);
-    }
-
-    /* ─── Toast ─── */
+    /* ─── Toast - MD3 Snackbar ─── */
     #toast {
       position: fixed;
       bottom: calc(80px + var(--safe-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 500;
-      pointer-events: none;
-      width: calc(100% - var(--space-xl));
-      max-width: 440px;
+      left: 50%; transform: translateX(-50%);
+      z-index: 500; pointer-events: none;
+      width: calc(100% - 32px); max-width: 440px;
     }
 
     .toast-item {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      padding: 12px var(--space-md);
-      border-radius: var(--radius-card);
-      font-size: 14px;
-      font-weight: 500;
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      margin-bottom: var(--space-sm);
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      border-radius: 4px;
+      font-size: 14px; font-weight: 400; color: #fff;
+      box-shadow: 0 3px 5px -1px rgba(0,0,0,0.2), 0 6px 10px rgba(0,0,0,0.14), 0 1px 18px rgba(0,0,0,0.12);
+      margin-bottom: 8px; line-height: 1.4;
     }
 
-    .toast-item.success {
-      background: var(--color-success);
-    }
+    .toast-item.success { background: #323232; }
+    .toast-item.error { background: #B3261E; }
 
-    .toast-item.error {
-      background: var(--color-error);
-    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
 
-    @keyframes toastIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes toastOut {
-      from {
-        opacity: 1;
-      }
-
-      to {
-        opacity: 0;
-      }
-    }
-
-    .toast-item.entering {
-      animation: toastIn 0.25s ease forwards;
-    }
-
-    .toast-item.leaving {
-      animation: toastOut 0.3s ease forwards;
-    }
-
-    /* ─── Divider ─── */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      margin: var(--space-md) 0;
-      color: var(--color-text-sub);
-      font-size: 12px;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--color-border);
-    }
+    .toast-item.entering { animation: toastIn 0.25s ease forwards; }
+    .toast-item.leaving { animation: toastOut 0.3s ease forwards; }
 
     /* iOS自動ズーム防止 */
     input, textarea, select {
@@ -1077,10 +1044,10 @@
       <header id="header">
         <span class="header-title">大谷チェッカー</span>
         <button class="header-btn" id="search-btn" aria-label="検索">
-          <i data-lucide="search" style="width:18px;height:18px;"></i>
+          <span class="ms" style="font-size:20px">search</span>
         </button>
         <button class="header-btn" id="account-btn" aria-label="アカウント">
-          <i data-lucide="user" style="width:18px;height:18px;"></i>
+          <span class="ms" style="font-size:20px">account_circle</span>
         </button>
       </header>
 
@@ -1090,7 +1057,7 @@
           <div class="account-email" id="account-email">loading...</div>
         </div>
         <button class="account-menu-item" id="signout-btn">
-          <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+          <span class="ms" style="font-size:16px">logout</span>
           ログアウト
         </button>
       </div>
@@ -1117,7 +1084,7 @@
       <!-- Empty State -->
       <div id="empty-state" class="hidden">
         <div class="empty-icon">
-          <i data-lucide="binoculars" style="width:32px;height:32px;"></i>
+          <span class="ms" style="font-size:32px;color:var(--color-accent)">manage_search</span>
         </div>
         <p class="empty-title">まだ記録がありません</p>
         <p class="empty-sub">大谷の広告を見つけたら<br>登録しよう！</p>
@@ -1128,7 +1095,7 @@
 
       <!-- FAB -->
       <button id="fab" class="hidden" aria-label="新しい記録を追加">
-        <i data-lucide="plus" style="width:24px;height:24px;"></i>
+        <span class="ms" style="font-size:24px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24">add</span>
       </button>
 
     </div><!-- /main-app -->
@@ -1142,52 +1109,56 @@
       <div class="modal-header">
         <span class="modal-title">新しい記録</span>
         <button class="modal-close-btn" id="add-close-btn" aria-label="閉じる">
-          <i data-lucide="x" style="width:16px;height:16px;"></i>
+          <span class="ms" style="font-size:20px">close</span>
         </button>
       </div>
       <div class="modal-body">
         <form id="add-form" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="add-title">タイトル</label>
-            <input id="add-title" class="form-input" type="text" placeholder="例：渋谷の大型ビジョン" autocomplete="off" />
+
+          <div class="md3-field">
+            <input id="add-title" class="md3-input" type="text" placeholder=" " autocomplete="off" />
+            <label class="md3-label" for="add-title">タイトル（任意）</label>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="add-note">メモ</label>
-            <textarea id="add-note" class="form-textarea" placeholder="どんな広告でしたか？"></textarea>
+          <div class="md3-field">
+            <textarea id="add-note" class="md3-textarea" placeholder=" "></textarea>
+            <label class="md3-label md3-textarea-label" for="add-note">メモ（任意）</label>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">日時</label>
-            <div id="add-datetime-display" class="form-display">
-              <span class="form-display-icon">📅</span>
-              <span class="form-display-value placeholder" id="add-datetime-text">取得中…</span>
-              <i data-lucide="pencil" class="form-display-edit" style="width:14px;height:14px;"></i>
+          <div style="margin-bottom:20px">
+            <div id="add-datetime-display" class="md3-display-field">
+              <span class="ms md3-display-leading">event</span>
+              <div class="md3-display-content">
+                <span class="md3-display-sublabel">日時</span>
+                <span class="md3-display-value placeholder" id="add-datetime-text">取得中…</span>
+              </div>
+              <span class="ms md3-display-trailing">edit</span>
             </div>
-            <input id="add-datetime-input" class="form-input hidden" type="datetime-local" />
+            <input id="add-datetime-input" class="md3-input hidden" type="datetime-local" style="margin-top:0" />
           </div>
 
-          <div class="form-group">
-            <label class="form-label">場所</label>
+          <div style="margin-bottom:20px">
             <div id="add-location-loading" class="form-location-loading">
               <div class="spinner"></div>
               <span class="loading-text">現在地を取得中…</span>
             </div>
-            <div id="add-location-display" class="form-display hidden">
-              <span class="form-display-icon">📍</span>
-              <span class="form-display-value placeholder" id="add-location-text">場所を入力してください</span>
-              <i data-lucide="pencil" class="form-display-edit" style="width:14px;height:14px;"></i>
+            <div id="add-location-display" class="md3-display-field hidden">
+              <span class="ms md3-display-leading">location_on</span>
+              <div class="md3-display-content">
+                <span class="md3-display-sublabel">場所</span>
+                <span class="md3-display-value placeholder" id="add-location-text">場所を入力してください</span>
+              </div>
+              <span class="ms md3-display-trailing">edit</span>
             </div>
-            <input id="add-location-input" class="form-input hidden" type="text" placeholder="場所を入力"
-              autocomplete="off" />
+            <input id="add-location-input" class="md3-input hidden" type="text" placeholder="場所を入力" autocomplete="off" />
             <input id="add-location-lat" type="hidden" />
             <input id="add-location-lng" type="hidden" />
           </div>
 
-          <div class="form-group">
+          <div style="margin-bottom:20px">
             <div class="divider">または</div>
             <button type="button" id="add-photo-btn" class="photo-btn">
-              <i data-lucide="camera" style="width:18px;height:18px;"></i>
+              <span class="ms" style="font-size:18px">photo_camera</span>
               写真から情報を読み取る
             </button>
             <input id="add-photo-file" type="file" accept="image/*" class="hidden" />
@@ -1213,7 +1184,7 @@
           <button class="btn-sm btn-sm-outline hidden" id="detail-edit-btn">編集</button>
           <button class="btn-sm btn-sm-danger hidden" id="detail-delete-btn">削除</button>
           <button class="modal-close-btn" id="detail-close-btn" aria-label="閉じる">
-            <i data-lucide="x" style="width:16px;height:16px;"></i>
+            <span class="ms" style="font-size:20px">close</span>
           </button>
         </div>
       </div>
@@ -1547,7 +1518,7 @@
       card.dataset.id = s.id;
 
       const locationHtml = s.location_label
-        ? `<div class="card-location"><i data-lucide="map-pin" style="width:11px;height:11px;"></i>${s.location_label}</div>`
+        ? `<div class="card-location"><span class="ms" style="font-size:12px">location_on</span>${s.location_label}</div>`
         : '';
       const titleHtml = s.title
         ? `<div class="card-title">${escapeHtml(s.title)}</div>`
@@ -1699,42 +1670,42 @@
       const view = document.getElementById('detail-view');
       view.innerHTML = `
       <div class="detail-row">
-        <div class="detail-row-icon"><i data-lucide="calendar" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-icon"><span class="ms" style="font-size:20px">event</span></div>
         <div class="detail-row-body">
           <div class="detail-row-label">日時</div>
           <div class="detail-row-value">${formatDatetime(s.datetime)}</div>
         </div>
       </div>
       <div class="detail-row">
-        <div class="detail-row-icon"><i data-lucide="map-pin" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-icon"><span class="ms" style="font-size:20px">location_on</span></div>
         <div class="detail-row-body">
           <div class="detail-row-label">場所</div>
           <div class="detail-row-value ${s.location_label ? '' : 'empty'}">${escapeHtml(s.location_label) || '未設定'}</div>
         </div>
       </div>
       <div class="detail-row">
-        <div class="detail-row-icon"><i data-lucide="tag" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-icon"><span class="ms" style="font-size:20px">label</span></div>
         <div class="detail-row-body">
           <div class="detail-row-label">タイトル</div>
           <div class="detail-row-value ${s.title ? '' : 'empty'}">${escapeHtml(s.title) || '未設定'}</div>
         </div>
       </div>
       <div class="detail-row">
-        <div class="detail-row-icon"><i data-lucide="file-text" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-icon"><span class="ms" style="font-size:20px">description</span></div>
         <div class="detail-row-body">
           <div class="detail-row-label">メモ</div>
           <div class="detail-row-value ${s.note ? '' : 'empty'}" style="white-space:pre-wrap">${escapeHtml(s.note) || '未設定'}</div>
         </div>
       </div>
       <div class="detail-row">
-        <div class="detail-row-icon"><i data-lucide="layers" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-icon"><span class="ms" style="font-size:20px">layers</span></div>
         <div class="detail-row-body">
           <div class="detail-row-label">登録方法</div>
           <div class="detail-row-value"><span class="badge badge--${s.source}">${s.source}</span></div>
         </div>
       </div>
       <div class="detail-row">
-        <div class="detail-row-icon"><i data-lucide="clock" style="width:16px;height:16px;"></i></div>
+        <div class="detail-row-icon"><span class="ms" style="font-size:20px">schedule</span></div>
         <div class="detail-row-body">
           <div class="detail-row-label">登録日</div>
           <div class="detail-row-value">${formatDatetime(s.created_at)}</div>
@@ -1743,7 +1714,6 @@
     `;
 
       document.getElementById('detail-modal').classList.remove('hidden');
-      lucide.createIcons();
     }
 
     function switchToEditMode(s) {
@@ -1785,18 +1755,14 @@
     }
 
     /* =============================================
-       Lucide Icons 再描画
+       Icons 再描画（Material Symbols使用のため空関数）
        ============================================= */
-    function refreshIcons() {
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
+    function refreshIcons() {}
 
     /* =============================================
        Init & Event Listeners
        ============================================= */
     async function init() {
-      lucide.createIcons();
-
       // 認証状態の監視
       supabase.auth.onAuthStateChange((event, session) => {
         if (session) {
